@@ -21,7 +21,7 @@ const NAV = [
 export default function Layout({ children, searchPlaceholder = 'Search...', onSearch }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, isAdmin } = useAuth();
   const [notifs, setNotifs] = useState([]);
   const [showNotif, setShowNotif] = useState(false);
 
@@ -91,7 +91,7 @@ export default function Layout({ children, searchPlaceholder = 'Search...', onSe
         <i className="fa fa-users" onClick={() => navigate('/employees')}></i>
         <i className="fa fa-wallet" onClick={() => navigate('/receipts')}></i>
         <i className="fa fa-chart-column" onClick={() => navigate('/reports')}></i>
-        <i className="fa fa-gear" onClick={() => navigate('/settings')}></i>
+        {isAdmin && <i className="fa fa-gear" onClick={() => navigate('/settings')}></i>}
       </div>
     </div>
   );
