@@ -75,7 +75,7 @@ export default function Layout({ children, searchPlaceholder = 'Search...', onSe
 
       <div className="ct-sidebar">
         <ul>
-          {NAV.map((n) => (
+          {NAV.filter((n) => n.path !== '/settings' || isAdmin).map((n) => (
             <li key={n.path} className={location.pathname === n.path ? 'active' : ''} onClick={() => navigate(n.path)}>
               <i className={`fa ${n.icon}`}></i> {n.label}
             </li>
