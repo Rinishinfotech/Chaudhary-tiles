@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Employee Wallet - CT Management</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Poppins,sans-serif;
+}
+
+body{
+  background:#f2f5fa;
+  color: #333;
+}
+
+/* HEADER */
+.header{
+  height:65px;
+  background:#0b1f3a;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  color:white;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:999;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  color:#ffc107;
+  cursor:pointer;
+}
+
+.search{
+  flex:1;
+  margin:0 20px;
+}
+
+.search input{
+  width:100%;
+  padding:11px;
+  border:none;
+  border-radius:8px;
+  outline:none;
+}
+
+.icons{
+  display:flex;
+  gap:18px;
+  align-items:center;
+  font-size:20px;
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: 35px;
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;
+  top:65px;
+  left:0;
+  bottom:0;
+  width:240px;
+  background:#132c4f;
+  overflow-y:auto;
+}
+
+.sidebar ul{
+  list-style:none;
+}
+
+.sidebar ul li{
+  padding:16px 20px;
+  color:white;
+  cursor:pointer;
+  transition:.3s;
+  font-size:15px;
+}
+
+.sidebar ul li:hover, .sidebar ul li.active{
+  background:#ffc107;
+  color:black;
+}
+
+.sidebar ul li i{
+  width:30px;
+}
+
+/* MAIN */
+.main{
+  margin-left:240px;
+  margin-top:65px;
+  padding:20px;
+  min-height: calc(100vh - 65px);
+}
+
+.page-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.page-title h2 {
+  color: #0b1f3a;
+  font-size: 18px;
+}
+
+/* MY LOGGED-IN WALLET SUMMARY */
+.my-wallet-card {
+  background: linear-gradient(135deg, #0b1f3a 0%, #1e3a8a 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  box-shadow: 0 8px 20px rgba(11,31,58,0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.my-wallet-info h3 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #cbd5e1;
+  margin-bottom: 5px;
+}
+
+.my-wallet-info h2 {
+  font-size: 26px;
+  color: #ffc107;
+  font-weight: 700;
+}
+
+.my-limit-stats {
+  display: flex;
+  gap: 20px;
+  background: rgba(255,255,255,0.1);
+  padding: 12px 20px;
+  border-radius: 10px;
+  backdrop-filter: blur(5px);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-item span {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.stat-item strong {
+  font-size: 16px;
+  color: #ffffff;
+}
+
+/* APPROVAL REQUESTS SECTION (ADMIN ONLY) */
+.approval-section {
+  background: #fffbebfb;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 25px;
+  display: none;
+}
+
+.approval-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #92400e;
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.approval-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.approval-card {
+  background: white;
+  border: 1px solid #fef3c7;
+  border-radius: 8px;
+  padding: 12px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+}
+
+.btn-approve {
+  background: #059669;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.btn-reject {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* WALLET CARDS GRID */
+.wallet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.wallet-card {
+  background: white;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 5px solid #0b1f3a;
+}
+
+.wallet-card.positive { border-left-color: #059669; }
+.wallet-card.negative { border-left-color: #dc3545; }
+
+.wallet-info h4 { font-size: 14px; color: #0b1f3a; margin-bottom: 4px; }
+.wallet-info p { font-size: 11px; color: #666; }
+.wallet-balance { font-size: 18px; font-weight: 700; color: #0b1f3a; }
+
+/* TABLE CARD */
+.card-table {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #f0f2f5;
+  font-size: 13px;
+}
+
+th {
+  background: #f8fafc;
+  color: #0b1f3a;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.type-credit { color: #059669; font-weight: 600; }
+.type-debit { color: #dc3545; font-weight: 600; }
+
+.status-badge {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-approved { background: #dcfce7; color: #15803d; }
+.status-pending { background: #fef3c7; color: #b45309; }
+.status-rejected { background: #fee2e2; color: #b91c1c; }
+
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.filter-bar select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #dcdfe6;
+  outline: none;
+  font-size: 13px;
+}
+
+/* MOBILE NAV */
+.bottomnav{ display:none; }
+
+@media(max-width:900px){
+  .sidebar{ display:none; }
+  .main{ margin-left:0; padding-bottom:90px; }
+  .search{ display:none; }
+  .header{ padding:0 10px; }
+  .my-wallet-card { flex-direction: column; align-items: flex-start; }
+  .my-limit-stats { width: 100%; justify-content: space-between; }
+  .bottomnav{
+    display:flex;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    height:65px;
+    background:white;
+    justify-content:space-around;
+    align-items:center;
+    box-shadow:0 -2px 10px rgba(0,0,0,.1);
+    z-index:999;
+  }
+  .bottomnav i{ font-size:22px; color:#0b1f3a; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo" onclick="openPage('super_admin_dashboard.html')">CT Management</div>
+  <div class="search">
+    <input type="text" id="passbookSearch" placeholder="Search Passbook Logs by Employee or Particulars..." onkeyup="filterPassbook()">
+  </div>
+  <div class="icons">
+    <i class="fa fa-bell" style="cursor:pointer;" title="Notifications"></i>
+    <span class="notification-badge" id="notifBadge">0</span>
+    <i class="fa fa-user-circle" onclick="logout()" title="Logout / Profile"></i>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <ul>
+    <li onclick="openPage('super_admin_dashboard.html')"><i class="fa fa-house"></i> Dashboard</li>
+    <li onclick="openPage('employee_management.html')"><i class="fa fa-users"></i> Employee Management</li>
+    <li onclick="openPage('party_management.html')"><i class="fa fa-user-group"></i> Party Management</li>
+    <li onclick="openPage('receipt_management.html')"><i class="fa fa-wallet"></i> Receipt Management</li>
+    <li onclick="openPage('expense_management.html')"><i class="fa fa-money-bill-wave"></i> Expense Management</li>
+    <li class="active" onclick="openPage('employee_wallet.html')"><i class="fa fa-briefcase"></i> Employee Wallet</li>
+    <li onclick="openPage('dispatch_management.html')"><i class="fa fa-truck"></i> Dispatch Management</li>
+    <li onclick="openPage('stock_management.html')"><i class="fa fa-cubes"></i> Stock Management</li>
+    <li onclick="openPage('production_management.html')"><i class="fa fa-industry"></i> Production</li>
+    <li onclick="openPage('dchallan_management.html')"><i class="fa fa-file-lines"></i> D Challan</li>
+    <li onclick="openPage('reports.html')"><i class="fa fa-chart-column"></i> Reports</li>
+    <li onclick="openPage('settings.html')"><i class="fa fa-gear"></i> Settings</li>
+    <li onclick="logout()"><i class="fa fa-right-from-bracket"></i> Logout</li>
+  </ul>
+</div>
+
+<!-- MAIN AREA -->
+<div class="main">
+
+  <div class="page-title">
+    <h2><i class="fa fa-briefcase" style="color:#ffc107;"></i> Employee Wallet Balances & Combined Passbook</h2>
+  </div>
+
+  <!-- LOGGED-IN EMPLOYEE WALLET LIMIT HEADER -->
+  <div class="my-wallet-card" id="myWalletHeader">
+    <div class="my-wallet-info">
+      <h3 id="myEmpName">Loading Employee Wallet...</h3>
+      <h2 id="myWalletBalance">₹0</h2>
+    </div>
+    <div class="my-limit-stats">
+      <div class="stat-item">
+        <span>Assigned Wallet Limit</span>
+        <strong id="myWalletLimit">₹0</strong>
+      </div>
+      <div class="stat-item">
+        <span>Role</span>
+        <strong id="myEmpRole">-</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPROVAL REQUESTS SECTION (SUPER ADMIN / ADMIN ONLY) -->
+  <div class="approval-section" id="approvalContainer">
+    <div class="approval-header">
+      <i class="fa fa-triangle-exclamation"></i>
+      <span>Pending Exceeded Wallet Limit Approval Requests</span>
+    </div>
+    <div class="approval-grid" id="approvalList">
+      <!-- Dynamic Approval Requests -->
+    </div>
+  </div>
+
+  <!-- ALL EMPLOYEES WALLET SUMMARY CARDS -->
+  <div class="wallet-grid" id="walletCardsContainer">
+    <!-- Dynamic Employee Cards -->
+  </div>
+
+  <div class="card-table">
+    <div class="filter-bar">
+      <select id="employeeFilter" onchange="filterPassbook()">
+        <option value="ALL">-- All Employees Passbook --</option>
+        <!-- Dynamic Options -->
+      </select>
+      <select id="typeFilter" onchange="filterPassbook()">
+        <option value="ALL">-- All Transaction Types --</option>
+        <option value="Credit">Credit (Receipts/Transfers In)</option>
+        <option value="Debit">Debit (Expenses/Transfers Out)</option>
+      </select>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Date</th>
+          <th>Employee Name</th>
+          <th>Type</th>
+          <th>Particulars / Source</th>
+          <th>Amount (₹)</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="passbookTableBody">
+        <!-- JS Dynamic Table Rows -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- BOTTOM MOBILE NAVIGATION -->
+<div class="bottomnav">
+  <i class="fa fa-house" onclick="openPage('super_admin_dashboard.html')"></i>
+  <i class="fa fa-users" onclick="openPage('employee_management.html')"></i>
+  <i class="fa fa-wallet" style="color: #ffc107;" onclick="openPage('receipt_management.html')"></i>
+  <i class="fa fa-chart-column" onclick="openPage('reports.html')"></i>
+  <i class="fa fa-gear" onclick="openPage('settings.html')"></i>
+</div>
+
+<script>
+let activeUser = null;
+let teamList = [];
+let receiptsList = [];
+let expenseList = [];
+let combinedPassbook = [];
+
+function checkUserSession() {
+  const session = localStorage.getItem('ct_active_user');
+  if(!session) {
+    window.location.href = "login.html";
+    return;
+  }
+  activeUser = JSON.parse(session);
+  loadWalletMaster();
+}
+
+function loadWalletMaster() {
+  teamList = JSON.parse(localStorage.getItem('ct_team') || '[]');
+  receiptsList = JSON.parse(localStorage.getItem('ct_receipts') || '[]');
+  expenseList = JSON.parse(localStorage.getItem('ct_expenses') || '[]');
+
+  calculateCalculatedBalances();
+  renderMyWalletHeader();
+  renderApprovalSection();
+  renderWalletCards();
+  buildCombinedPassbook();
+}
+
+/* Calculate real balances based on Receipts & Expenses */
+function calculateCalculatedBalances() {
+  teamList.forEach(emp => {
+    let receiptsTotal = 0;
+    let expenseTotal = 0;
+
+    // Sum Receipts received by this employee
+    receiptsList.forEach(r => {
+      if(r.receiverType === "Employee" && r.receiver === emp.name) {
+        receiptsTotal += parseFloat(r.amount || 0);
+      }
+    });
+
+    // Sum Approved Expenses & Transfers spent by this employee
+    expenseList.forEach(e => {
+      const isApproved = (e.status === "Approved" || !e.status);
+      if(e.spentBy === emp.name && isApproved) {
+        expenseTotal += parseFloat(e.amount || 0);
+      }
+      // Add incoming transfers
+      if(e.category === "Wallet Fund Transfer" && e.paidTo === emp.name && isApproved) {
+        receiptsTotal += parseFloat(e.amount || 0);
+      }
+    });
+
+    // Net balance calculation
+    emp.calculatedWallet = receiptsTotal - expenseTotal;
+  });
+}
+
+function renderMyWalletHeader() {
+  const empData = teamList.find(t => t.name === activeUser.name) || {
+    name: activeUser.name,
+    role: activeUser.role,
+    walletLimit: 0,
+    calculatedWallet: 0
+  };
+
+  document.getElementById('myEmpName').innerText = empData.name;
+  document.getElementById('myEmpRole').innerText = empData.role;
+  document.getElementById('myWalletBalance').innerText = "₹" + (empData.calculatedWallet || 0).toLocaleString();
+  document.getElementById('myWalletLimit').innerText = "₹" + (parseFloat(empData.walletLimit) || 0).toLocaleString();
+}
+
+function renderApprovalSection() {
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+  const container = document.getElementById('approvalContainer');
+  const list = document.getElementById('approvalList');
+
+  if(!isAdmin) {
+    container.style.display = "none";
+    return;
+  }
+
+  const pendingExceeded = expenseList.filter(e => e.status === "Pending");
+  
+  if(pendingExceeded.length === 0) {
+    container.style.display = "none";
+    return;
+  }
+
+  container.style.display = "block";
+  document.getElementById('notifBadge').innerText = pendingExceeded.length;
+  list.innerHTML = "";
+
+  pendingExceeded.forEach(exp => {
+    list.innerHTML += `
+      <div class="approval-card">
+        <div>
+          <strong style="color:#0b1f3a; font-size:13px;">${exp.spentBy}</strong>
+          <div style="font-size:11px; color:#666;">${exp.category} | ₹${parseFloat(exp.amount).toLocaleString()}</div>
+          <small style="font-size:10px; color:#dc3545;">Exceeded Limit by ₹${(exp.exceededBy || 0).toLocaleString()}</small>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn-approve" onclick="updateExpenseStatus(${exp.id}, 'Approved')">Approve</button>
+          <button class="btn-reject" onclick="updateExpenseStatus(${exp.id}, 'Rejected')">Reject</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function updateExpenseStatus(expId, newStatus) {
+  const idx = expenseList.findIndex(e => e.id === expId);
+  if(idx !== -1) {
+    expenseList[idx].status = newStatus;
+    localStorage.setItem('ct_expenses', JSON.stringify(expenseList));
+    loadWalletMaster();
+    alert(`Transaction status updated to ${newStatus}!`);
+  }
+}
+
+function renderWalletCards() {
+  const container = document.getElementById('walletCardsContainer');
+  const empFilter = document.getElementById('employeeFilter');
+  
+  container.innerHTML = "";
+  empFilter.innerHTML = `<option value="ALL">-- All Employees Passbook --</option>`;
+
+  teamList.forEach(t => {
+    let bal = t.calculatedWallet || 0;
+    let cardClass = bal >= 0 ? 'positive' : 'negative';
+
+    let displayBal = "₹" + bal.toLocaleString();
+
+    container.innerHTML += `
+      <div class="wallet-card ${cardClass}">
+        <div class="wallet-info">
+          <h4>${t.name}</h4>
+          <p>${t.role} | Limit: ₹${(parseFloat(t.walletLimit) || 0).toLocaleString()}</p>
+        </div>
+        <div class="wallet-balance">${displayBal}</div>
+      </div>
+    `;
+
+    empFilter.innerHTML += `<option value="${t.name}">${t.name}</option>`;
+  });
+}
+
+function buildCombinedPassbook() {
+  combinedPassbook = [];
+
+  // Receipts (Credits)
+  receiptsList.forEach(r => {
+    if(r.receiverType === "Employee") {
+      combinedPassbook.push({
+        id: r.id,
+        date: r.date,
+        empName: r.receiver,
+        type: "Credit",
+        particulars: `Received from ${r.party} (${r.mode}) - ${r.srNo || ''}`,
+        amount: r.amount,
+        status: "Approved"
+      });
+    }
+  });
+
+  // Expenses & Transfers (Debits & Inter-wallet Credits)
+  expenseList.forEach(e => {
+    const isTransfer = e.category === "Wallet Fund Transfer";
+    
+    // Sender Debit
+    combinedPassbook.push({
+      id: e.id,
+      date: e.date,
+      empName: e.spentBy,
+      type: "Debit",
+      particulars: isTransfer ? `Transfer to ${e.paidTo}` : `Paid for ${e.category}`,
+      amount: e.amount,
+      status: e.status || "Approved"
+    });
+
+    // Receiver Credit (if inter-wallet transfer)
+    if(isTransfer && e.paidTo) {
+      combinedPassbook.push({
+        id: e.id + "_tr",
+        date: e.date,
+        empName: e.paidTo,
+        type: "Credit",
+        particulars: `Received Transfer from ${e.spentBy}`,
+        amount: e.amount,
+        status: e.status || "Approved"
+      });
+    }
+  });
+
+  // Sort by date descending
+  combinedPassbook.sort((a,b) => new Date(b.date) - new Date(a.date));
+  renderPassbook(combinedPassbook);
+}
+
+function renderPassbook(list) {
+  const tbody = document.getElementById('passbookTableBody');
+  tbody.innerHTML = "";
+
+  list.forEach((p, index) => {
+    let statusClass = "status-approved";
+    if(p.status === "Pending") statusClass = "status-pending";
+    if(p.status === "Rejected") statusClass = "status-rejected";
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${p.date}</td>
+        <td><strong>${p.empName}</strong></td>
+        <td><span class="${p.type === 'Credit' ? 'type-credit' : 'type-debit'}">${p.type}</span></td>
+        <td>${p.particulars}</td>
+        <td><strong class="${p.type === 'Credit' ? 'type-credit' : 'type-debit'}">₹${parseFloat(p.amount).toLocaleString()}</strong></td>
+        <td><span class="status-badge ${statusClass}">${p.status || 'Approved'}</span></td>
+      </tr>
+    `;
+  });
+}
+
+function filterPassbook() {
+  const searchQ = document.getElementById('passbookSearch').value.toLowerCase();
+  const selectedEmp = document.getElementById('employeeFilter').value;
+  const selectedType = document.getElementById('typeFilter').value;
+
+  const filtered = combinedPassbook.filter(p => {
+    const matchesSearch = p.empName.toLowerCase().includes(searchQ) || p.particulars.toLowerCase().includes(searchQ);
+    const matchesEmp = (selectedEmp === "ALL" || p.empName === selectedEmp);
+    const matchesType = (selectedType === "ALL" || p.type === selectedType);
+    return matchesSearch && matchesEmp && matchesType;
+  });
+
+  renderPassbook(filtered);
+}
+
+function openPage(page){ window.location.href = page; }
+function logout(){
+  if(confirm("Logout from CT Management Portal?")){
+    localStorage.removeItem('ct_active_user');
+    window.location.href = "login.html";
+  }
+}
+
+window.onload = checkUserSession;
+</script>
+</body>
+</html>

@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dispatch Management - CT Management</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Poppins,sans-serif;
+}
+
+body{
+  background:#f2f5fa;
+  color: #333;
+}
+
+/* HEADER */
+.header{
+  height:65px;
+  background:#0b1f3a;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  color:white;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:999;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  color:#ffc107;
+  cursor:pointer;
+}
+
+.search{
+  flex:1;
+  margin:0 20px;
+}
+
+.search input{
+  width:100%;
+  padding:11px;
+  border:none;
+  border-radius:8px;
+  outline:none;
+}
+
+.icons{
+  display:flex;
+  gap:18px;
+  align-items:center;
+  font-size:20px;
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: 35px;
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;
+  top:65px;
+  left:0;
+  bottom:0;
+  width:240px;
+  background:#132c4f;
+  overflow-y:auto;
+}
+
+.sidebar ul{
+  list-style:none;
+}
+
+.sidebar ul li{
+  padding:16px 20px;
+  color:white;
+  cursor:pointer;
+  transition:.3s;
+  font-size:15px;
+}
+
+.sidebar ul li:hover, .sidebar ul li.active{
+  background:#ffc107;
+  color:black;
+}
+
+.sidebar ul li i{
+  width:30px;
+}
+
+/* MAIN */
+.main{
+  margin-left:240px;
+  margin-top:65px;
+  padding:20px;
+  min-height: calc(100vh - 65px);
+}
+
+.page-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.page-title h2 {
+  color: #0b1f3a;
+  font-size: 18px;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-add {
+  background: #0b1f3a;
+  color: #ffc107;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-search-challan {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-add:hover { background: #132c4f; }
+.btn-search-challan:hover { background: #1d4ed8; }
+
+/* TABLE CARD */
+.card-table {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #f0f2f5;
+  font-size: 13px;
+}
+
+th {
+  background: #f8fafc;
+  color: #0b1f3a;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+}
+.status-dispatched { background: #dcfce7; color: #166534; }
+.status-pending { background: #fef3c7; color: #92400e; }
+
+.btn-action {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 4px;
+}
+
+.btn-dispatch-act { background: #059669; color: white; }
+.btn-cancel-act { background: #dc3545; color: white; }
+.btn-view-act { background: #2563eb; color: white; }
+
+/* DYNAMIC ITEMS BUILDER */
+.item-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.item-row input, .item-row select {
+  padding: 8px;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.btn-remove-row {
+  background: #fee2e2;
+  color: #dc3545;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* MODAL */
+.modal-overlay{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,0.5);
+  z-index:1000;
+  justify-content:center;
+  align-items:center;
+  padding:15px;
+}
+
+.modal{
+  background:white;
+  width:100%;
+  max-width:650px;
+  border-radius:15px;
+  padding:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:2px solid #f2f5fa;
+  padding-bottom:12px;
+  margin-bottom:20px;
+}
+
+.modal-header h3{
+  color:#0b1f3a;
+  font-size:18px;
+}
+
+.modal-close{
+  font-size:20px;
+  cursor:pointer;
+  color:#777;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #444;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+  padding: 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  outline: none;
+  font-size: 13px;
+}
+
+.btn-submit {
+  width: 100%;
+  background: #0b1f3a;
+  color: #ffc107;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  color: #334155;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+/* MOBILE NAV */
+.bottomnav{ display:none; }
+
+@media(max-width:900px){
+  .sidebar{ display:none; }
+  .main{ margin-left:0; padding-bottom:90px; }
+  .search{ display:none; }
+  .header{ padding:0 10px; }
+  .bottomnav{
+    display:flex;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    height:65px;
+    background:white;
+    justify-content:space-around;
+    align-items:center;
+    box-shadow:0 -2px 10px rgba(0,0,0,.1);
+    z-index:999;
+  }
+  .bottomnav i{ font-size:22px; color:#0b1f3a; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- DATALIST FOR SEARCH & SELECT ITEMS -->
+<datalist id="itemListDatalist">
+  <!-- Dynamic Options from Item Details -->
+</datalist>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo" onclick="openPage('super_admin_dashboard.html')">CT Management</div>
+  <div class="search">
+    <input type="text" id="dispatchSearch" placeholder="Search Dispatch by ID, Challan No, Party Name or Vehicle..." onkeyup="filterDispatch()">
+  </div>
+  <div class="icons">
+    <i class="fa fa-bell" style="cursor:pointer;" title="Notifications"></i>
+    <span class="notification-badge" id="notifBadge">0</span>
+    <i class="fa fa-user-circle" onclick="logout()" title="Logout / Profile"></i>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <ul>
+    <li onclick="openPage('super_admin_dashboard.html')"><i class="fa fa-house"></i> Dashboard</li>
+    <li onclick="openPage('employee_management.html')"><i class="fa fa-users"></i> Employee Management</li>
+    <li onclick="openPage('party_management.html')"><i class="fa fa-user-group"></i> Party Management</li>
+    <li onclick="openPage('receipt_management.html')"><i class="fa fa-wallet"></i> Receipt Management</li>
+    <li onclick="openPage('expense_management.html')"><i class="fa fa-money-bill-wave"></i> Expense Management</li>
+    <li onclick="openPage('employee_wallet.html')"><i class="fa fa-briefcase"></i> Employee Wallet</li>
+    <li class="active" onclick="openPage('dispatch_management.html')"><i class="fa fa-truck"></i> Dispatch Management</li>
+    <li onclick="openPage('stock_management.html')"><i class="fa fa-cubes"></i> Stock Management</li>
+    <li onclick="openPage('production_management.html')"><i class="fa fa-industry"></i> Production</li>
+    <li onclick="openPage('dchallan_management.html')"><i class="fa fa-file-lines"></i> D Challan</li>
+    <li onclick="openPage('reports.html')"><i class="fa fa-chart-column"></i> Reports</li>
+    <li onclick="openPage('settings.html')"><i class="fa fa-gear"></i> Settings</li>
+    <li onclick="logout()"><i class="fa fa-right-from-bracket"></i> Logout</li>
+  </ul>
+</div>
+
+<!-- MAIN AREA -->
+<div class="main">
+
+  <div class="page-title">
+    <h2><i class="fa fa-truck" style="color:#ffc107;"></i> Tile Dispatch & D-Challan Portal</h2>
+    <div class="btn-group">
+      <button class="btn-search-challan" onclick="openChallanSearchModal()"><i class="fa fa-file-invoice"></i> Search Party / Challan Photo</button>
+      <button class="btn-add" id="addDispatchBtn" onclick="openDispatchModal()"><i class="fa fa-plus"></i> Create Loading Order</button>
+    </div>
+  </div>
+
+  <div class="card-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Order / Date</th>
+          <th>Plant / Party</th>
+          <th>Vehicle & Driver</th>
+          <th>Tile Items Breakdown</th>
+          <th>Total Pcs</th>
+          <th>D-Challan No</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="dispatchTableBody">
+        <!-- JS Dynamic Table Rows -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CREATE DISPATCH MODAL -->
+<div class="modal-overlay" id="dispatchModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa fa-truck-ramp-box" style="color:#ffc107;"></i> Create Loading & Dispatch Order</h3>
+      <i class="fa fa-xmark modal-close" onclick="closeDispatchModal()"></i>
+    </div>
+
+    <form id="dispatchForm" onsubmit="saveDispatchOrder(event)">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Order ID</label>
+          <input type="text" id="dispId" readonly style="background:#f8fafc; font-weight:600; color:#0b1f3a;">
+        </div>
+        <div class="form-group">
+          <label>Order Date</label>
+          <input type="date" id="dispDate" required>
+        </div>
+        <div class="form-group">
+          <label>Plant Unit</label>
+          <select id="dispPlant" required>
+            <option value="Sipara Plant">Sipara Plant</option>
+            <option value="Nandlal Chhapra Plant">Nandlal Chhapra Plant</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Search & Select Party</label>
+          <select id="dispParty" required>
+            <!-- Dynamic Options -->
+          </select>
+        </div>
+
+        <!-- DYNAMIC TILES SECTION -->
+        <div class="form-group full-width">
+          <label>Tile Items (Search & Select) & Color Specification</label>
+          <div id="itemsContainer">
+            <!-- Dynamic Item Rows -->
+          </div>
+          <button type="button" class="btn-secondary" onclick="addItemRow()"><i class="fa fa-plus"></i> Add Another Tile Item</button>
+        </div>
+
+        <div class="form-group">
+          <label>Vehicle Number</label>
+          <input type="text" id="dispVehicle" placeholder="e.g. BR-01-GB-4512" required>
+        </div>
+        <div class="form-group">
+          <label>Driver Name & Contact</label>
+          <input type="text" id="dispDriver" placeholder="e.g. Rajesh (9876543210)" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">Save Order (Pending Dispatch)</button>
+    </form>
+  </div>
+</div>
+
+<!-- DISPATCH FULFILLMENT MODAL (CHALLAN UPLOAD) -->
+<div class="modal-overlay" id="fulfillModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa fa-file-circle-check" style="color:#059669;"></i> Complete Dispatch & D-Challan</h3>
+      <i class="fa fa-xmark modal-close" onclick="closeFulfillModal()"></i>
+    </div>
+
+    <form onsubmit="submitFulfillment(event)">
+      <input type="hidden" id="fulfillOrderId">
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label>Enter D-Challan Number</label>
+          <input type="text" id="dispChallanNo" placeholder="e.g. CH-2026-998" required>
+        </div>
+        <div class="form-group full-width">
+          <label>Upload D-Challan Photo / Copy</label>
+          <input type="file" id="dispChallanImg" accept="image/*" required onchange="previewChallanFile(event)">
+          <div id="challanPreviewBox" style="margin-top:10px; display:none;">
+            <img id="challanImgTag" src="" style="max-width:100%; max-height:200px; border-radius:8px; border:1px solid #ccc;">
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" style="background:#059669; color:white;">Submit & Mark Dispatched</button>
+    </form>
+  </div>
+</div>
+
+<!-- VIEW CHALLAN MODAL -->
+<div class="modal-overlay" id="viewChallanModal">
+  <div class="modal" style="text-align:center;">
+    <div class="modal-header">
+      <h3><i class="fa fa-file-invoice" style="color:#0b1f3a;"></i> D-Challan Document View</h3>
+      <i class="fa fa-xmark modal-close" onclick="closeViewChallanModal()"></i>
+    </div>
+
+    <div style="margin-bottom:15px; text-align:left;">
+      <h4 id="viewPartyName" style="color:#0b1f3a;">-</h4>
+      <p id="viewChallanDetails" style="font-size:12px; color:#666;">-</p>
+    </div>
+
+    <div style="margin-bottom:20px; background:#f8fafc; padding:10px; border-radius:10px;">
+      <img id="viewChallanImage" src="" style="max-width:100%; max-height:400px; border-radius:8px;">
+    </div>
+
+    <a id="downloadChallanBtn" download="D_Challan.png" href="" class="btn-submit" style="display:inline-block; text-decoration:none;">
+      <i class="fa fa-download"></i> Download D-Challan Photo
+    </a>
+  </div>
+</div>
+
+<!-- SEARCH PARTY / CHALLAN MODAL -->
+<div class="modal-overlay" id="challanSearchModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa fa-magnifying-glass" style="color:#2563eb;"></i> View & Download Party D-Challan</h3>
+      <i class="fa fa-xmark modal-close" onclick="closeChallanSearchModal()"></i>
+    </div>
+
+    <div class="form-group" style="margin-bottom:15px;">
+      <label>Type Party Name or Challan No.</label>
+      <input type="text" id="partyChallanQuery" placeholder="e.g. Patna Infra or CH-2026-101" onkeyup="searchChallanDocs()">
+    </div>
+
+    <div id="challanSearchResults" style="max-height:350px; overflow-y:auto;">
+      <!-- Dynamic Search Result Cards -->
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM MOBILE NAVIGATION -->
+<div class="bottomnav">
+  <i class="fa fa-house" onclick="openPage('super_admin_dashboard.html')"></i>
+  <i class="fa fa-users" onclick="openPage('employee_management.html')"></i>
+  <i class="fa fa-wallet" onclick="openPage('receipt_management.html')"></i>
+  <i class="fa fa-chart-column" onclick="openPage('reports.html')"></i>
+  <i class="fa fa-gear" onclick="openPage('settings.html')"></i>
+</div>
+
+<script>
+let activeUser = null;
+let dispatchList = [];
+let partyList = [];
+let itemMasterList = [];
+let tempChallanBase64 = "";
+
+function checkUserSession() {
+  const session = localStorage.getItem('ct_active_user');
+  if(!session) {
+    window.location.href = "login.html";
+    return;
+  }
+  activeUser = JSON.parse(session);
+  loadMasterData();
+}
+
+function loadMasterData() {
+  partyList = JSON.parse(localStorage.getItem('ct_parties') || '[]');
+  dispatchList = JSON.parse(localStorage.getItem('ct_dispatches') || '[]');
+  
+  // FETCH FROM ITEM DETAILS (ct_items / itemDetails)
+  const rawItems = JSON.parse(localStorage.getItem('ct_items') || localStorage.getItem('itemDetails') || '[]');
+  
+  if (Array.isArray(rawItems)) {
+    itemMasterList = rawItems.map(i => typeof i === 'string' ? i : (i.name || i.itemName || i.title || JSON.stringify(i)));
+  } else if (typeof rawItems === 'object' && rawItems !== null) {
+    itemMasterList = Object.keys(rawItems);
+  } else {
+    itemMasterList = [];
+  }
+
+  // Fallback defaults if Item Details is empty
+  if (itemMasterList.length === 0) {
+    itemMasterList = ["I-Shape (60mm)", "Zig-Zag (80mm)", "Hexagonal (60mm)", "Cover Block", "3D Star Pattern"];
+  }
+
+  // Populate Datalist for Search & Select Placeholders
+  const datalist = document.getElementById('itemListDatalist');
+  datalist.innerHTML = "";
+  itemMasterList.forEach(item => {
+    datalist.innerHTML += `<option value="${item}">`;
+  });
+
+  if(dispatchList.length === 0) {
+    dispatchList = [
+      {
+        id: "DISP-501",
+        date: "2026-03-28",
+        plant: "Sipara Plant",
+        party: "Patna Infra Corp",
+        vehicle: "BR-01-GB-4512",
+        driver: "Rajesh Sharma",
+        items: [
+          { pattern: "I-Shape (60mm)", color: "Red", qty: 100 },
+          { pattern: "I-Shape (60mm)", color: "Yellow", qty: 400 }
+        ],
+        totalQty: 500,
+        status: "Dispatched",
+        challanNo: "CH-2026-101",
+        challanImg: "https://via.placeholder.com/400x500?text=Sample+D-Challan+Copy"
+      }
+    ];
+    localStorage.setItem('ct_dispatches', JSON.stringify(dispatchList));
+  }
+
+  renderTable(dispatchList);
+}
+
+function renderTable(list) {
+  const tbody = document.getElementById('dispatchTableBody');
+  tbody.innerHTML = "";
+
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+
+  list.forEach((d) => {
+    let statusClass = "status-pending";
+    if(d.status === "Dispatched") statusClass = "status-dispatched";
+
+    let itemsHtml = d.items.map(i => `<small>• ${i.pattern} (${i.color}): <strong>${i.qty} Pcs</strong></small>`).join("<br>");
+
+    let actionBtns = "";
+    
+    if(d.status === "Pending Dispatch") {
+      actionBtns += `<button class="btn-action btn-dispatch-act" onclick="openFulfillModal('${d.id}')"><i class="fa fa-truck-fast"></i> Dispatch</button>`;
+    }
+
+    if(d.challanImg) {
+      actionBtns += `<button class="btn-action btn-view-act" onclick="viewChallan('${d.id}')"><i class="fa fa-image"></i> Challan</button>`;
+    }
+
+    // Delete / Remove on Cancel
+    if(isAdmin) {
+      actionBtns += `<button class="btn-action btn-cancel-act" onclick="cancelOrder('${d.id}')"><i class="fa fa-trash"></i> Delete</button>`;
+    }
+
+    tbody.innerHTML += `
+      <tr>
+        <td><strong>${d.id}</strong><br><small>${d.date}</small></td>
+        <td><strong>${d.party}</strong><br><small style="color:#666;">${d.plant}</small></td>
+        <td>${d.vehicle}<br><small style="color:#666;">${d.driver}</small></td>
+        <td>${itemsHtml}</td>
+        <td><strong>${d.totalQty.toLocaleString()} Pcs</strong></td>
+        <td><strong>${d.challanNo || '-'}</strong></td>
+        <td><span class="status-badge ${statusClass}">${d.status}</span></td>
+        <td>${actionBtns}</td>
+      </tr>
+    `;
+  });
+}
+
+function filterDispatch() {
+  const q = document.getElementById('dispatchSearch').value.toLowerCase();
+  const filtered = dispatchList.filter(d => 
+    d.id.toLowerCase().includes(q) || 
+    d.party.toLowerCase().includes(q) || 
+    (d.challanNo && d.challanNo.toLowerCase().includes(q)) ||
+    d.vehicle.toLowerCase().includes(q)
+  );
+  renderTable(filtered);
+}
+
+/* OPEN CREATE DISPATCH MODAL */
+function openDispatchModal() {
+  const nextId = "DISP-" + (501 + dispatchList.length);
+  document.getElementById('dispId').value = nextId;
+  document.getElementById('dispDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('dispVehicle').value = "";
+  document.getElementById('dispDriver').value = "";
+
+  const partySelect = document.getElementById('dispParty');
+  partySelect.innerHTML = "";
+  if (partyList.length === 0) {
+    partySelect.innerHTML = `<option value="General Party">General Party</option>`;
+  } else {
+    partyList.forEach(p => {
+      partySelect.innerHTML += `<option value="${p.name}">${p.name} (City: ${p.city || 'Patna'})</option>`;
+    });
+  }
+
+  document.getElementById('itemsContainer').innerHTML = "";
+  addItemRow();
+
+  document.getElementById('dispatchModal').style.display = 'flex';
+}
+
+function closeDispatchModal() {
+  document.getElementById('dispatchModal').style.display = 'none';
+}
+
+/* SEARCHABLE ITEM ROW FROM ITEM DETAILS */
+function addItemRow() {
+  const container = document.getElementById('itemsContainer');
+  const rowId = "row_" + Date.now();
+  
+  const div = document.createElement('div');
+  div.className = "item-row";
+  div.id = rowId;
+  div.innerHTML = `
+    <input type="text" class="item-pattern" list="itemListDatalist" placeholder="Search & Select Item..." style="flex:2;" required>
+    <select class="item-color" style="flex:1;" required>
+      <option value="Red">Red</option>
+      <option value="Yellow">Yellow</option>
+      <option value="Grey">Grey</option>
+      <option value="Black">Black</option>
+    </select>
+    <input type="number" class="item-qty" placeholder="Pcs Qty" style="flex:1;" required min="1">
+    <button type="button" class="btn-remove-row" onclick="removeRow('${rowId}')"><i class="fa fa-trash"></i></button>
+  `;
+  container.appendChild(div);
+}
+
+function removeRow(rowId) {
+  const row = document.getElementById(rowId);
+  if(document.querySelectorAll('.item-row').length > 1) {
+    row.remove();
+  } else {
+    alert("At least one item is required!");
+  }
+}
+
+/* SAVE DISPATCH ORDER */
+function saveDispatchOrder(e) {
+  e.preventDefault();
+
+  const id = document.getElementById('dispId').value;
+  const date = document.getElementById('dispDate').value;
+  const plant = document.getElementById('dispPlant').value;
+  const party = document.getElementById('dispParty').value;
+  const vehicle = document.getElementById('dispVehicle').value;
+  const driver = document.getElementById('dispDriver').value;
+
+  const rows = document.querySelectorAll('.item-row');
+  let items = [];
+  let totalQty = 0;
+
+  rows.forEach(r => {
+    const pattern = r.querySelector('.item-pattern').value;
+    const color = r.querySelector('.item-color').value;
+    const qty = parseInt(r.querySelector('.item-qty').value || 0);
+
+    items.push({ pattern, color, qty });
+    totalQty += qty;
+  });
+
+  const newOrder = {
+    id, date, plant, party, vehicle, driver,
+    items, totalQty,
+    status: "Pending Dispatch",
+    challanNo: "",
+    challanImg: ""
+  };
+
+  dispatchList.unshift(newOrder);
+  localStorage.setItem('ct_dispatches', JSON.stringify(dispatchList));
+
+  renderTable(dispatchList);
+  closeDispatchModal();
+  alert(`Loading Order ${id} saved!`);
+}
+
+/* FULFILL / DISPATCH ACTION */
+function openFulfillModal(orderId) {
+  document.getElementById('fulfillOrderId').value = orderId;
+  document.getElementById('dispChallanNo').value = "";
+  document.getElementById('dispChallanImg').value = "";
+  document.getElementById('challanPreviewBox').style.display = "none";
+  tempChallanBase64 = "";
+
+  document.getElementById('fulfillModal').style.display = "flex";
+}
+
+function closeFulfillModal() {
+  document.getElementById('fulfillModal').style.display = "none";
+}
+
+function previewChallanFile(event) {
+  const file = event.target.files[0];
+  if(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      tempChallanBase64 = e.target.result;
+      document.getElementById('challanImgTag').src = tempChallanBase64;
+      document.getElementById('challanPreviewBox').style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function submitFulfillment(e) {
+  e.preventDefault();
+
+  const orderId = document.getElementById('fulfillOrderId').value;
+  const challanNo = document.getElementById('dispChallanNo').value;
+
+  if(!tempChallanBase64) {
+    alert("Please upload the D-Challan photo copy!");
+    return;
+  }
+
+  const idx = dispatchList.findIndex(d => d.id === orderId);
+  if(idx !== -1) {
+    dispatchList[idx].status = "Dispatched";
+    dispatchList[idx].challanNo = challanNo;
+    dispatchList[idx].challanImg = tempChallanBase64;
+
+    // Party Dues Update
+    const order = dispatchList[idx];
+    const partyObj = partyList.find(p => p.name === order.party);
+    
+    let totalBill = 0;
+    order.items.forEach(i => {
+      let rate = 18.5;
+      if(i.pattern.toLowerCase().includes("zig-zag")) {
+        rate = partyObj ? (partyObj.rateZigZag || 19.0) : 19.0;
+      } else {
+        rate = partyObj ? (partyObj.rateIShape || 18.5) : 18.5;
+      }
+      totalBill += (i.qty * rate);
+    });
+
+    if(partyObj) {
+      const pIdx = partyList.findIndex(p => p.name === order.party);
+      if(pIdx !== -1) {
+        partyList[pIdx].dues = (partyList[pIdx].dues || 0) + totalBill;
+        localStorage.setItem('ct_parties', JSON.stringify(partyList));
+      }
+    }
+
+    localStorage.setItem('ct_dispatches', JSON.stringify(dispatchList));
+
+    renderTable(dispatchList);
+    closeFulfillModal();
+    alert(`Order ${orderId} successfully marked DISPATCHED!`);
+  }
+}
+
+/* CANCEL & REMOVE ORDER FROM LIST */
+function cancelOrder(orderId) {
+  if(confirm(`Are you sure you want to CANCEL & REMOVE order ${orderId}?`)) {
+    dispatchList = dispatchList.filter(d => d.id !== orderId);
+    localStorage.setItem('ct_dispatches', JSON.stringify(dispatchList));
+    renderTable(dispatchList);
+    alert(`Order ${orderId} has been deleted.`);
+  }
+}
+
+/* VIEW D-CHALLAN MODAL */
+function viewChallan(orderId) {
+  const order = dispatchList.find(d => d.id === orderId);
+  if(order && order.challanImg) {
+    document.getElementById('viewPartyName').innerText = order.party + " (" + order.id + ")";
+    document.getElementById('viewChallanDetails').innerText = "Challan No: " + order.challanNo + " | Vehicle: " + order.vehicle;
+    document.getElementById('viewChallanImage').src = order.challanImg;
+    document.getElementById('downloadChallanBtn').href = order.challanImg;
+    document.getElementById('downloadChallanBtn').download = `D_Challan_${order.challanNo}.png`;
+
+    document.getElementById('viewChallanModal').style.display = "flex";
+  }
+}
+
+function closeViewChallanModal() {
+  document.getElementById('viewChallanModal').style.display = "none";
+}
+
+/* PARTY & CHALLAN SEARCH PORTAL */
+function openChallanSearchModal() {
+  document.getElementById('partyChallanQuery').value = "";
+  searchChallanDocs();
+  document.getElementById('challanSearchModal').style.display = "flex";
+}
+
+function closeChallanSearchModal() {
+  document.getElementById('challanSearchModal').style.display = "none";
+}
+
+function searchChallanDocs() {
+  const q = document.getElementById('partyChallanQuery').value.toLowerCase().trim();
+  const container = document.getElementById('challanSearchResults');
+  container.innerHTML = "";
+
+  const results = dispatchList.filter(d => d.challanImg && (
+    d.party.toLowerCase().includes(q) || 
+    d.challanNo.toLowerCase().includes(q) ||
+    d.id.toLowerCase().includes(q)
+  ));
+
+  if(results.length === 0) {
+    container.innerHTML = `<p style="text-align:center; color:#888; font-size:13px; padding:20px;">No D-Challan documents found matching query.</p>`;
+    return;
+  }
+
+  results.forEach(res => {
+    container.innerHTML += `
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <strong style="color:#0b1f3a; font-size:14px;">${res.party}</strong>
+          <p style="font-size:12px; color:#666; margin-top:2px;">Challan: <strong>${res.challanNo}</strong> | Date: ${res.date}</p>
+        </div>
+        <div>
+          <button class="btn-action btn-view-act" onclick="viewChallan('${res.id}')"><i class="fa fa-eye"></i> View / Download</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function openPage(page){ window.location.href = page; }
+function logout(){
+  if(confirm("Logout from CT Management Portal?")){
+    localStorage.removeItem('ct_active_user');
+    window.location.href = "login.html";
+  }
+}
+
+window.onload = checkUserSession;
+</script>
+</body>
+</html>

@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Super Admin Dashboard - CT Management</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Poppins,sans-serif;
+}
+
+body{
+  background:#f2f5fa;
+  color: #333;
+}
+
+/* HEADER */
+.header{
+  height:65px;
+  background:#0b1f3a;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  color:white;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:999;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  color:#ffc107;
+  cursor:pointer;
+}
+
+.search{
+  flex:1;
+  margin:0 20px;
+}
+
+.search input{
+  width:100%;
+  padding:11px;
+  border:none;
+  border-radius:8px;
+  outline:none;
+}
+
+.icons{
+  display:flex;
+  gap:18px;
+  align-items:center;
+  font-size:20px;
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: 35px;
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;
+  top:65px;
+  left:0;
+  bottom:0;
+  width:240px;
+  background:#132c4f;
+  overflow-y:auto;
+}
+
+.sidebar ul{
+  list-style:none;
+}
+
+.sidebar ul li{
+  padding:16px 20px;
+  color:white;
+  cursor:pointer;
+  transition:.3s;
+  font-size:15px;
+}
+
+.sidebar ul li:hover, .sidebar ul li.active{
+  background:#ffc107;
+  color:black;
+}
+
+.sidebar ul li i{
+  width:30px;
+}
+
+/* MAIN */
+.main{
+  margin-left:240px;
+  margin-top:65px;
+  padding:20px;
+  min-height: calc(100vh - 65px);
+}
+
+.user-welcome {
+  background: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.user-welcome h3 {
+  color: #0b1f3a;
+  font-size: 16px;
+}
+
+.role-tag {
+  background: #ffeba3;
+  color: #856404;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* SUMMARY */
+.summary{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:18px;
+}
+
+.box{
+  background:white;
+  border-radius:15px;
+  padding:20px;
+  box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.box.clickable{
+  cursor:pointer;
+  transition:.3s;
+}
+
+.box.clickable:hover{
+  transform:translateY(-3px);
+  box-shadow:0 8px 20px rgba(0,0,0,.12);
+}
+
+.box h4{
+  color:#777;
+  font-size:14px;
+}
+
+.box h2{
+  margin-top:10px;
+  color:#0b1f3a;
+}
+
+/* MODULES */
+.modules{
+  margin-top:30px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:18px;
+}
+
+.module{
+  background:white;
+  padding:25px;
+  border-radius:15px;
+  text-align:center;
+  cursor:pointer;
+  transition:.3s;
+  box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.module:hover{
+  background:#0b1f3a;
+  color:white;
+  transform:translateY(-6px);
+}
+
+.module i{
+  font-size:35px;
+  color:#ffc107;
+  margin-bottom:12px;
+}
+
+.module h3{
+  font-size:17px;
+}
+
+/* MODALS */
+.modal-overlay{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,0.5);
+  z-index:1000;
+  justify-content:center;
+  align-items:center;
+  padding:15px;
+}
+
+.modal{
+  background:white;
+  width:100%;
+  max-width:600px;
+  border-radius:15px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:2px solid #f2f5fa;
+  padding-bottom:12px;
+  margin-bottom:15px;
+}
+
+.modal-header h3{
+  color:#0b1f3a;
+  font-size:18px;
+}
+
+.modal-close{
+  font-size:20px;
+  cursor:pointer;
+  color:#777;
+}
+
+.approval-list, .notif-list {
+  list-style:none;
+  max-height:320px;
+  overflow-y:auto;
+}
+
+.approval-item, .notif-item {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  background:#f8fafc;
+  border-radius:10px;
+  margin-bottom:10px;
+  border:1px solid #e2e8f0;
+}
+
+.approval-info h4, .notif-item h4 {
+  font-size:14px;
+  color:#0b1f3a;
+}
+
+.approval-info p, .notif-item p {
+  font-size:12px;
+  color:#666;
+}
+
+.approval-btns{
+  display:flex;
+  gap:8px;
+}
+
+.btn-approve{
+  background:#28a745;
+  color:white;
+  border:none;
+  padding:6px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:600;
+}
+
+.btn-reject{
+  background:#dc3545;
+  color:white;
+  border:none;
+  padding:6px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:600;
+}
+
+/* MOBILE NAV */
+.bottomnav{
+  display:none;
+}
+
+@media(max-width:900px){
+  .sidebar{
+    display:none;
+  }
+
+  .main{
+    margin-left:0;
+    padding-bottom:90px;
+  }
+
+  .search{
+    display:none;
+  }
+
+  .header{
+    padding:0 10px;
+  }
+
+  .summary{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .modules{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .bottomnav{
+    display:flex;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    height:65px;
+    background:white;
+    justify-content:space-around;
+    align-items:center;
+    box-shadow:0 -2px 10px rgba(0,0,0,.1);
+    z-index:999;
+  }
+
+  .bottomnav i{
+    font-size:22px;
+    color:#0b1f3a;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo" onclick="openPage('super_admin_dashboard.html')">CT Management</div>
+  <div class="search">
+    <input type="text" id="globalSearch" placeholder="Search Party / Employee / Vouchers..." onkeyup="handleGlobalSearch()">
+  </div>
+  <div class="icons">
+    <i class="fa fa-bell" onclick="openNotifModal()" style="cursor:pointer;" title="Notifications"></i>
+    <span class="notification-badge" id="notifBadge">1</span>
+    <i class="fa fa-user-circle" onclick="logout()" title="Logout / Profile"></i>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <ul>
+    <li class="active" onclick="openPage('super_admin_dashboard.html')"><i class="fa fa-house"></i> Dashboard</li>
+    <li onclick="openPage('employee_management.html')"><i class="fa fa-users"></i> Employee Management</li>
+    <li onclick="openPage('party_management.html')"><i class="fa fa-user-group"></i> Party Management</li>
+    <li onclick="openPage('receipt_management.html')"><i class="fa fa-wallet"></i> Receipt Management</li>
+    <li onclick="openPage('expense_management.html')"><i class="fa fa-money-bill-wave"></i> Expense Management</li>
+    <li onclick="openPage('employee_wallet.html')"><i class="fa fa-briefcase"></i> Employee Wallet</li>
+    <li onclick="openPage('dispatch_management.html')"><i class="fa fa-truck"></i> Dispatch Management</li>
+    <li onclick="openPage('stock_management.html')"><i class="fa fa-cubes"></i> Stock Management</li>
+    <li onclick="openPage('production_management.html')"><i class="fa fa-industry"></i> Production</li>
+    <li onclick="openPage('dchallan_management.html')"><i class="fa fa-file-lines"></i> D Challan</li>
+    <li onclick="openPage('reports.html')"><i class="fa fa-chart-column"></i> Reports</li>
+    <li onclick="openPage('settings.html')"><i class="fa fa-gear"></i> Settings</li>
+    <li onclick="logout()"><i class="fa fa-right-from-bracket"></i> Logout</li>
+  </ul>
+</div>
+
+<!-- MAIN AREA -->
+<div class="main">
+
+  <div class="user-welcome">
+    <div>
+      <h3 id="welcomeName">Welcome User</h3>
+      <small style="color:#666;" id="welcomePlant">Assigned Plant: Both Plants</small>
+    </div>
+    <span class="role-tag" id="welcomeRole">Super Admin</span>
+  </div>
+
+  <div class="summary">
+    <div class="box">
+      <h4>Today's Receipt</h4>
+      <h2 id="todayReceiptTotal">₹0</h2>
+    </div>
+    <div class="box">
+      <h4>Today's Expense</h4>
+      <h2 id="todayExpenseTotal">₹0</h2>
+    </div>
+    <div class="box">
+      <h4>Dispatch Count</h4>
+      <h2 id="todayDispatchCount">0</h2>
+    </div>
+    <div class="box clickable" onclick="openPendingModal()">
+      <h4>Pending Approval <i class="fa fa-arrow-up-right-from-square" style="font-size:12px; color:#ffc107;"></i></h4>
+      <h2 id="pendingCount">3</h2>
+    </div>
+  </div>
+
+  <div class="modules">
+    <div class="module" onclick="openPage('employee_management.html')">
+      <i class="fa fa-users"></i>
+      <h3>Employee</h3>
+    </div>
+    <div class="module" onclick="openPage('party_management.html')">
+      <i class="fa fa-user-group"></i>
+      <h3>Party</h3>
+    </div>
+    <div class="module" onclick="openPage('receipt_management.html')">
+      <i class="fa fa-wallet"></i>
+      <h3>Receipt</h3>
+    </div>
+    <div class="module" onclick="openPage('expense_management.html')">
+      <i class="fa fa-money-bill-wave"></i>
+      <h3>Expense</h3>
+    </div>
+    <div class="module" onclick="openPage('stock_management.html')">
+      <i class="fa fa-cubes"></i>
+      <h3>Stock</h3>
+    </div>
+    <div class="module" onclick="openPage('dispatch_management.html')">
+      <i class="fa fa-truck"></i>
+      <h3>Dispatch</h3>
+    </div>
+    <div class="module" onclick="openPage('production_management.html')">
+      <i class="fa fa-industry"></i>
+      <h3>Production</h3>
+    </div>
+    <div class="module" onclick="openPage('dchallan_management.html')">
+      <i class="fa fa-file-lines"></i>
+      <h3>D Challan</h3>
+    </div>
+  </div>
+</div>
+
+<!-- PENDING APPROVAL MODAL -->
+<div class="modal-overlay" id="pendingModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa fa-clock" style="color:#ffc107;"></i> Pending Approvals</h3>
+      <i class="fa fa-xmark modal-close" onclick="closePendingModal()"></i>
+    </div>
+    <ul class="approval-list" id="approvalList">
+      <li class="approval-item" id="item-1">
+        <div class="approval-info">
+          <h4>Dispatch Approval (Sipara Plant)</h4>
+          <p>Request by Brajesh Kumar • 1,500 Pcs I-Shape</p>
+        </div>
+        <div class="approval-btns">
+          <button class="btn-approve" onclick="actionApproval('item-1', 'Approved')">Approve</button>
+          <button class="btn-reject" onclick="actionApproval('item-3', 'Rejected')">Reject</button>
+        </div>
+      </li>
+      <li class="approval-item" id="item-2">
+        <div class="approval-info">
+          <h4>Expense Claim: ₹2,500 (Diesel Limit Cross)</h4>
+          <p>Request by Jitendra Kumar</p>
+        </div>
+        <div class="approval-btns">
+          <button class="btn-approve" onclick="actionApproval('item-2', 'Approved')">Approve</button>
+          <button class="btn-reject" onclick="actionApproval('item-2', 'Rejected')">Reject</button>
+        </div>
+      </li>
+      <li class="approval-item" id="item-3">
+        <div class="approval-info">
+          <h4>D-Challan #DC-109 Confirmation</h4>
+          <p>Request by Jayendra Kumar • Nandlal Chhapra</p>
+        </div>
+        <div class="approval-btns">
+          <button class="btn-approve" onclick="actionApproval('item-3', 'Approved')">Approve</button>
+          <button class="btn-reject" onclick="actionApproval('item-3', 'Rejected')">Reject</button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- BROADCAST NOTIFICATIONS MODAL -->
+<div class="modal-overlay" id="notifModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa fa-bell" style="color:#ffc107;"></i> All Broadcast Notifications</h3>
+      <i class="fa fa-xmark modal-close" onclick="closeNotifModal()"></i>
+    </div>
+    <ul class="notif-list" id="notifListContainer">
+      <!-- JS Dynamic Render -->
+    </ul>
+  </div>
+</div>
+
+<!-- BOTTOM MOBILE NAVIGATION -->
+<div class="bottomnav">
+  <i class="fa fa-house" style="color: #ffc107;" onclick="openPage('super_admin_dashboard.html')"></i>
+  <i class="fa fa-users" onclick="openPage('employee_management.html')"></i>
+  <i class="fa fa-wallet" onclick="openPage('receipt_management.html')"></i>
+  <i class="fa fa-chart-column" onclick="openPage('reports.html')"></i>
+  <i class="fa fa-gear" onclick="openPage('settings.html')"></i>
+</div>
+
+<script>
+let count = 3;
+let activeUser = null;
+
+function checkUserSession() {
+  const session = localStorage.getItem('ct_active_user');
+  if(!session) {
+    window.location.href = "login.html";
+    return;
+  }
+  activeUser = JSON.parse(session);
+  document.getElementById('welcomeName').innerText = "Welcome, " + activeUser.name;
+  document.getElementById('welcomeRole').innerText = activeUser.role;
+  document.getElementById('welcomePlant').innerText = "Assigned Plant: " + activeUser.plant;
+
+  loadDashboardSummary();
+  loadNotifications();
+}
+
+function loadDashboardSummary() {
+  // Load LocalStorage Totals
+  const receipts = JSON.parse(localStorage.getItem('ct_receipts') || '[]');
+  const expenses = JSON.parse(localStorage.getItem('ct_expenses') || '[]');
+  const dispatches = JSON.parse(localStorage.getItem('ct_dispatches') || '[]');
+
+  const today = new Date().toISOString().split('T')[0];
+
+  let todayReceiptSum = receipts.filter(r => r.date === today).reduce((acc, obj) => acc + parseFloat(obj.amount || 0), 0);
+  let todayExpenseSum = expenses.filter(e => e.date === today).reduce((acc, obj) => acc + parseFloat(obj.amount || 0), 0);
+  let todayDispatchCount = dispatches.filter(d => d.date === today).length;
+
+  document.getElementById('todayReceiptTotal').innerText = "₹" + todayReceiptSum.toLocaleString();
+  document.getElementById('todayExpenseTotal').innerText = "₹" + todayExpenseSum.toLocaleString();
+  document.getElementById('todayDispatchCount').innerText = todayDispatchCount;
+}
+
+function loadNotifications() {
+  const notifications = JSON.parse(localStorage.getItem('ct_notifications') || '[]');
+  const container = document.getElementById('notifListContainer');
+  document.getElementById('notifBadge').innerText = notifications.length;
+
+  container.innerHTML = "";
+  if(notifications.length === 0) {
+    container.innerHTML = `<p style="text-align:center; padding:15px; color:#777;">No new notifications</p>`;
+    return;
+  }
+
+  notifications.forEach(n => {
+    container.innerHTML += `
+      <li class="notif-item">
+        <div>
+          <h4>${n.title}</h4>
+          <p>${n.msg}</p>
+        </div>
+        <small style="color:#888;">${n.time || 'Today'}</small>
+      </li>
+    `;
+  });
+}
+
+function openPage(page){
+  window.location.href = page;
+}
+
+function logout(){
+  if(confirm("Logout from CT Management Portal?")){
+    localStorage.removeItem('ct_active_user');
+    window.location.href = "login.html";
+  }
+}
+
+function openPendingModal() {
+  document.getElementById('pendingModal').style.display = 'flex';
+}
+
+function closePendingModal() {
+  document.getElementById('pendingModal').style.display = 'none';
+}
+
+function openNotifModal() {
+  document.getElementById('notifModal').style.display = 'flex';
+}
+
+function closeNotifModal() {
+  document.getElementById('notifModal').style.display = 'none';
+}
+
+function actionApproval(itemId, action) {
+  alert("Request " + action + " successfully!");
+  const item = document.getElementById(itemId);
+  if(item) {
+    item.remove();
+    count--;
+    document.getElementById('pendingCount').innerText = count;
+  }
+  if(count === 0) {
+    document.getElementById('approvalList').innerHTML = '<p style="text-align:center; padding:15px; color:#777;">No pending approvals!</p>';
+  }
+}
+
+function handleGlobalSearch() {
+  const q = document.getElementById('globalSearch').value.toLowerCase();
+  if(q.length > 2) {
+    console.log("Global search query:", q);
+  }
+}
+
+window.onload = checkUserSession;
+</script>
+
+</body>
+</html>

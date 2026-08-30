@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Expense Management - CT Management</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Poppins,sans-serif;
+}
+
+body{
+  background:#f2f5fa;
+  color: #333;
+}
+
+/* HEADER */
+.header{
+  height:65px;
+  background:#0b1f3a;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  color:white;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:999;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  color:#ffc107;
+  cursor:pointer;
+}
+
+.search{
+  flex:1;
+  margin:0 20px;
+}
+
+.search input{
+  width:100%;
+  padding:11px;
+  border:none;
+  border-radius:8px;
+  outline:none;
+}
+
+.icons{
+  display:flex;
+  gap:18px;
+  align-items:center;
+  font-size:20px;
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: 35px;
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;
+  top:65px;
+  left:0;
+  bottom:0;
+  width:240px;
+  background:#132c4f;
+  overflow-y:auto;
+}
+
+.sidebar ul{
+  list-style:none;
+}
+
+.sidebar ul li{
+  padding:16px 20px;
+  color:white;
+  cursor:pointer;
+  transition:.3s;
+  font-size:15px;
+}
+
+.sidebar ul li:hover, .sidebar ul li.active{
+  background:#ffc107;
+  color:black;
+}
+
+.sidebar ul li i{
+  width:30px;
+}
+
+/* MAIN */
+.main{
+  margin-left:240px;
+  margin-top:65px;
+  padding:20px;
+  min-height: calc(100vh - 65px);
+}
+
+.page-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.page-title h2 {
+  color: #0b1f3a;
+  font-size: 18px;
+}
+
+.btn-group-head {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-add {
+  background: #0b1f3a;
+  color: #ffc107;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-transfer {
+  background: #059669;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-cat-mgmt {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-add:hover { background: #132c4f; }
+.btn-transfer:hover { background: #047857; }
+.btn-cat-mgmt:hover { background: #1d4ed8; }
+
+/* FILTER BAR */
+.filter-card {
+  background: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+
+.filter-group input {
+  padding: 8px 12px;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  outline: none;
+  font-size: 13px;
+}
+
+.btn-filter-reset {
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.summary-badge {
+  margin-left: auto;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: #1e40af;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* TABLE CARD */
+.card-table {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #f0f2f5;
+  font-size: 13px;
+}
+
+th {
+  background: #f8fafc;
+  color: #0b1f3a;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.cat-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #e2e8f0;
+  color: #334155;
+  display: inline-block;
+}
+
+/* MODAL */
+.modal-overlay{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,0.5);
+  z-index:1000;
+  justify-content:center;
+  align-items:center;
+  padding:15px;
+}
+
+.modal{
+  background:white;
+  width:100%;
+  max-width:600px;
+  border-radius:15px;
+  padding:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:2px solid #f2f5fa;
+  padding-bottom:12px;
+  margin-bottom:20px;
+}
+
+.modal-header h3{
+  color:#0b1f3a;
+  font-size:18px;
+}
+
+.modal-close{
+  font-size:20px;
+  cursor:pointer;
+  color:#777;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #444;
+}
+
+.form-group input, .form-group select {
+  padding: 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  outline: none;
+  font-size: 13px;
+}
+
+.form-group input[readonly], .form-group select[disabled] {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.btn-submit {
+  width: 100%;
+  background: #0b1f3a;
+  color: #ffc107;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* Category List inside Modal */
+.cat-item-list {
+  list-style: none;
+  margin-top: 15px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.cat-item-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 13px;
+}
+
+.cat-item-list li:last-child {
+  border-bottom: none;
+}
+
+.btn-del-cat {
+  color: #ef4444;
+  cursor: pointer;
+  padding: 4px 8px;
+  border: none;
+  background: #fee2e2;
+  border-radius: 4px;
+}
+
+/* MOBILE NAV */
+.bottomnav{ display:none; }
+
+@media(max-width:900px){
+  .sidebar{ display:none; }
+  .main{ margin-left:0; padding-bottom:90px; }
+  .search{ display:none; }
+  .header{ padding:0 10px; }
+  .summary-badge { margin-left: 0; width: 100%; text-align: center; }
+  .bottomnav{
+    display:flex;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    height:65px;
+    background:white;
+    justify-content:space-around;
+    align-items:center;
+    box-shadow:0 -2px 10px rgba(0,0,0,.1);
+    z-index:999;
+  }
+  .bottomnav i{ font-size:22px; color:#0b1f3a; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo" onclick="openPage('super_admin_dashboard.html')">CT Management</div>
+  <div class="search">
+    <input type="text" id="expenseSearch" placeholder="Search Expense by Employee, Category or Remarks..." onkeyup="filterExpenses()">
+  </div>
+  <div class="icons">
+    <i class="fa fa-bell" style="cursor:pointer;" title="Notifications"></i>
+    <span class="notification-badge" id="notifBadge">1</span>
+    <i class="fa fa-user-circle" onclick="logout()" title="Logout / Profile"></i>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <ul>
+    <li onclick="openPage('super_admin_dashboard.html')"><i class="fa fa-house"></i> Dashboard</li>
+    <li onclick="openPage('employee_management.html')"><i class="fa fa-users"></i> Employee Management</li>
+    <li onclick="openPage('party_management.html')"><i class="fa fa-user-group"></i> Party Management</li>
+    <li onclick="openPage('receipt_management.html')"><i class="fa fa-wallet"></i> Receipt Management</li>
+    <li class="active" onclick="openPage('expense_management.html')"><i class="fa fa-money-bill-wave"></i> Expense Management</li>
+    <li onclick="openPage('employee_wallet.html')"><i class="fa fa-briefcase"></i> Employee Wallet</li>
+    <li onclick="openPage('dispatch_management.html')"><i class="fa fa-truck"></i> Dispatch Management</li>
+    <li onclick="openPage('stock_management.html')"><i class="fa fa-cubes"></i> Stock Management</li>
+    <li onclick="openPage('production_management.html')"><i class="fa fa-industry"></i> Production</li>
+    <li onclick="openPage('dchallan_management.html')"><i class="fa fa-file-lines"></i> D Challan</li>
+    <li onclick="openPage('reports.html')"><i class="fa fa-chart-column"></i> Reports</li>
+    <li onclick="openPage('settings.html')"><i class="fa fa-gear"></i> Settings</li>
+    <li onclick="logout()"><i class="fa fa-right-from-bracket"></i> Logout</li>
+  </ul>
+</div>
+
+<!-- MAIN AREA -->
+<div class="main">
+
+  <div class="page-title">
+    <h2><i class="fa fa-money-bill-wave" style="color:#ffc107;"></i> Expense Logs & Transfers</h2>
+    <div class="btn-group-head" id="headBtnGroup">
+      <button class="btn-cat-mgmt" id="btnManageCat" onclick="openCatModal()" style="display:none;"><i class="fa fa-list-check"></i> Categories</button>
+      <button class="btn-transfer" onclick="openTransferModal()"><i class="fa fa-arrow-right-arrow-left"></i> Inter-Wallet Transfer</button>
+      <button class="btn-add" onclick="openExpenseModal()"><i class="fa fa-plus"></i> Record Expense</button>
+    </div>
+  </div>
+
+  <!-- DURATION & SEARCH FILTER BAR -->
+  <div class="filter-card">
+    <div class="filter-group">
+      <label>From:</label>
+      <input type="date" id="filterFromDate" onchange="filterExpenses()">
+    </div>
+    <div class="filter-group">
+      <label>To:</label>
+      <input type="date" id="filterToDate" onchange="filterExpenses()">
+    </div>
+    <button class="btn-filter-reset" onclick="resetFilters()"><i class="fa fa-rotate"></i> Reset</button>
+    
+    <div class="summary-badge" id="totalExpenseDisplay">
+      Total Expense: ₹0
+    </div>
+  </div>
+
+  <div class="card-table">
+    <table>
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Date</th>
+          <th>Spent By / Sender</th>
+          <th>Category / Recipient</th>
+          <th>Amount Spent</th>
+          <th>Remarks / Note</th>
+        </tr>
+      </thead>
+      <tbody id="expenseTableBody">
+        <!-- Dynamic Expense Entries -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- RECORD EXPENSE MODAL -->
+<div class="modal-overlay" id="expenseModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa fa-receipt" style="color:#ffc107;"></i> Record Expense</h3>
+      <i class="fa fa-xmark modal-close" onclick="closeExpenseModal()"></i>
+    </div>
+
+    <form id="expenseForm" onsubmit="saveExpense(event)">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="expenseDate" required>
+        </div>
+        <div class="form-group">
+          <label>Paid From Wallet (Employee)</label>
+          <select id="expenseEmp" required>
+            <!-- Dynamic Options -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Expense Category</label>
+          <select id="expenseCategory" required>
+            <!-- Dynamic Category Options -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Amount Spent (₹)</label>
+          <input type="number" id="expenseAmount" placeholder="Enter Amount" required min="1">
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+          <label>Remarks / Detail Note</label>
+          <input type="text" id="expenseRemarks" placeholder="Enter expense note or description">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">Deduct & Save Expense</button>
+    </form>
+  </div>
+</div>
+
+<!-- INTER-WALLET TRANSFER MODAL -->
+<div class="modal-overlay" id="transferModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa fa-arrow-right-arrow-left" style="color:#059669;"></i> Inter-Employee Wallet Transfer</h3>
+      <i class="fa fa-xmark modal-close" onclick="closeTransferModal()"></i>
+    </div>
+
+    <form id="transferForm" onsubmit="executeTransfer(event)">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Sender (From Wallet)</label>
+          <select id="transferFrom" required>
+            <!-- Dynamic Options -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Receiver (To Wallet)</label>
+          <select id="transferTo" required>
+            <!-- Dynamic Options -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Transfer Amount (₹)</label>
+          <input type="number" id="transferAmount" placeholder="Enter Amount" required min="1">
+        </div>
+        <div class="form-group">
+          <label>Transfer Note</label>
+          <input type="text" id="transferNote" placeholder="e.g. Cash handed over for diesel" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" style="background:#059669; color:white;">Transfer Wallet Funds</button>
+    </form>
+  </div>
+</div>
+
+<!-- CATEGORY MANAGEMENT MODAL (ADMIN ONLY) -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa fa-list-check" style="color:#2563eb;"></i> Manage Expense Categories</h3>
+      <i class="fa fa-xmark modal-close" onclick="closeCatModal()"></i>
+    </div>
+
+    <form onsubmit="addCategory(event)">
+      <div style="display:flex; gap:10px; margin-bottom:15px;">
+        <input type="text" id="newCatInput" placeholder="Enter New Category Name" required style="flex:1; padding:10px; border:1px solid #dcdfe6; border-radius:8px; outline:none; font-size:13px;">
+        <button type="submit" style="background:#2563eb; color:white; border:none; padding:10px 16px; border-radius:8px; font-weight:600; cursor:pointer;">Add</button>
+      </div>
+    </form>
+
+    <ul class="cat-item-list" id="catListUl">
+      <!-- Dynamic Category List -->
+    </ul>
+  </div>
+</div>
+
+<!-- BOTTOM MOBILE NAVIGATION -->
+<div class="bottomnav">
+  <i class="fa fa-house" onclick="openPage('super_admin_dashboard.html')"></i>
+  <i class="fa fa-users" onclick="openPage('employee_management.html')"></i>
+  <i class="fa fa-wallet" onclick="openPage('receipt_management.html')"></i>
+  <i class="fa fa-chart-column" onclick="openPage('reports.html')"></i>
+  <i class="fa fa-gear" onclick="openPage('settings.html')"></i>
+</div>
+
+<script>
+let activeUser = null;
+let expenseList = [];
+let teamList = [];
+let categoryList = [];
+
+function checkUserSession() {
+  const session = localStorage.getItem('ct_active_user');
+  if(!session) {
+    window.location.href = "login.html";
+    return;
+  }
+  activeUser = JSON.parse(session);
+
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+  if(isAdmin) {
+    document.getElementById('btnManageCat').style.display = "flex";
+  }
+
+  loadData();
+}
+
+function loadData() {
+  teamList = JSON.parse(localStorage.getItem('ct_team') || '[]');
+  expenseList = JSON.parse(localStorage.getItem('ct_expenses') || '[]');
+  categoryList = JSON.parse(localStorage.getItem('ct_categories') || '[]');
+
+  if(categoryList.length === 0) {
+    categoryList = [
+      "Raw Material (Cement/Dust/Chips)",
+      "Labor / Worker Payment",
+      "Diesel / Fuel & Machinery",
+      "Tea / Food / Office Misc",
+      "Electricity / Maintenance"
+    ];
+    localStorage.setItem('ct_categories', JSON.stringify(categoryList));
+  }
+
+  if(expenseList.length === 0) {
+    const today = getTodayDateStr();
+    expenseList = [
+      { id: 1, date: today, spentBy: "Monu Kumar", category: "Diesel / Fuel & Machinery", amount: 2500, remarks: "Generator Diesel" },
+      { id: 2, date: today, spentBy: "Brajesh Kumar", category: "Tea / Food / Office Misc", amount: 350, remarks: "Tea & Snacks for Factory Workers" }
+    ];
+    localStorage.setItem('ct_expenses', JSON.stringify(expenseList));
+  }
+
+  filterExpenses();
+}
+
+function getTodayDateStr() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function renderTable(list) {
+  const tbody = document.getElementById('expenseTableBody');
+  tbody.innerHTML = "";
+
+  let totalSum = 0;
+
+  list.forEach((e, index) => {
+    totalSum += parseFloat(e.amount || 0);
+
+    const isTransfer = e.category.includes("Transfer");
+    const catLabel = isTransfer ? `Transfer to: ${e.paidTo || '-'}` : e.category;
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${e.date}</td>
+        <td><strong>${e.spentBy}</strong></td>
+        <td><span class="cat-badge">${catLabel}</span></td>
+        <td><strong style="color:#dc3545;">₹${parseFloat(e.amount).toLocaleString()}</strong></td>
+        <td>${e.remarks || '-'}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('totalExpenseDisplay').innerText = `Total Expense: ₹${totalSum.toLocaleString()}`;
+}
+
+function filterExpenses() {
+  const q = document.getElementById('expenseSearch').value.toLowerCase();
+  const fromDate = document.getElementById('filterFromDate').value;
+  const toDate = document.getElementById('filterToDate').value;
+
+  const filtered = expenseList.filter(e => {
+    const matchesQuery = e.spentBy.toLowerCase().includes(q) || 
+                         e.category.toLowerCase().includes(q) || 
+                         (e.remarks && e.remarks.toLowerCase().includes(q));
+
+    let matchesDate = true;
+    if(fromDate) matchesDate = matchesDate && (e.date >= fromDate);
+    if(toDate) matchesDate = matchesDate && (e.date <= toDate);
+
+    return matchesQuery && matchesDate;
+  });
+
+  renderTable(filtered);
+}
+
+function resetFilters() {
+  document.getElementById('expenseSearch').value = "";
+  document.getElementById('filterFromDate').value = "";
+  document.getElementById('filterToDate').value = "";
+  filterExpenses();
+}
+
+function populateDropdowns() {
+  const empSelect = document.getElementById('expenseEmp');
+  const fromSelect = document.getElementById('transferFrom');
+  const toSelect = document.getElementById('transferTo');
+  const catSelect = document.getElementById('expenseCategory');
+
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+
+  // Expense categories
+  catSelect.innerHTML = "";
+  categoryList.forEach(c => {
+    catSelect.innerHTML += `<option value="${c}">${c}</option>`;
+  });
+
+  // Employee Dropdowns
+  empSelect.innerHTML = "";
+  fromSelect.innerHTML = "";
+  toSelect.innerHTML = "";
+
+  teamList.forEach(t => {
+    const optText = `${t.name} (Bal: ₹${t.wallet || 0})`;
+    empSelect.innerHTML += `<option value="${t.name}">${optText}</option>`;
+    fromSelect.innerHTML += `<option value="${t.name}">${optText}</option>`;
+    toSelect.innerHTML += `<option value="${t.name}">${optText}</option>`;
+  });
+
+  // Lock user if Employee
+  if(!isAdmin) {
+    empSelect.value = activeUser.name;
+    empSelect.disabled = true;
+
+    fromSelect.value = activeUser.name;
+    fromSelect.disabled = true;
+  } else {
+    empSelect.disabled = false;
+    fromSelect.disabled = false;
+  }
+}
+
+/* RECORD EXPENSE MODAL FUNCTIONS */
+function openExpenseModal() {
+  populateDropdowns();
+  const dateInput = document.getElementById('expenseDate');
+  const today = getTodayDateStr();
+
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+  
+  if(!isAdmin) {
+    dateInput.value = today;
+    dateInput.min = today;
+    dateInput.max = today;
+  } else {
+    dateInput.value = today;
+    dateInput.removeAttribute('min');
+    dateInput.removeAttribute('max');
+  }
+
+  document.getElementById('expenseAmount').value = "";
+  document.getElementById('expenseRemarks').value = "";
+  document.getElementById('expenseModal').style.display = 'flex';
+}
+
+function closeExpenseModal() {
+  document.getElementById('expenseModal').style.display = 'none';
+}
+
+function saveExpense(evt) {
+  evt.preventDefault();
+  const date = document.getElementById('expenseDate').value;
+  const spentBy = document.getElementById('expenseEmp').value;
+  const category = document.getElementById('expenseCategory').value;
+  const amount = parseFloat(document.getElementById('expenseAmount').value);
+  const remarks = document.getElementById('expenseRemarks').value;
+
+  const empIdx = teamList.findIndex(t => t.name === spentBy);
+  if(empIdx !== -1) {
+    teamList[empIdx].wallet = (teamList[empIdx].wallet || 0) - amount;
+    localStorage.setItem('ct_team', JSON.stringify(teamList));
+  }
+
+  const newExp = { id: Date.now(), date, spentBy, category, amount, remarks };
+  expenseList.unshift(newExp);
+  localStorage.setItem('ct_expenses', JSON.stringify(expenseList));
+
+  filterExpenses();
+  closeExpenseModal();
+  alert("Expense recorded successfully!");
+}
+
+/* INTER-WALLET TRANSFER MODAL FUNCTIONS */
+function openTransferModal() {
+  populateDropdowns();
+  document.getElementById('transferAmount').value = "";
+  document.getElementById('transferNote').value = "";
+  document.getElementById('transferModal').style.display = 'flex';
+}
+
+function closeTransferModal() {
+  document.getElementById('transferModal').style.display = 'none';
+}
+
+function executeTransfer(evt) {
+  evt.preventDefault();
+  const senderName = document.getElementById('transferFrom').value;
+  const receiverName = document.getElementById('transferTo').value;
+  const amount = parseFloat(document.getElementById('transferAmount').value);
+  const note = document.getElementById('transferNote').value;
+
+  if(senderName === receiverName) {
+    alert("Sender and Receiver cannot be the same person!");
+    return;
+  }
+
+  const senderIdx = teamList.findIndex(t => t.name === senderName);
+  const receiverIdx = teamList.findIndex(t => t.name === receiverName);
+
+  if(senderIdx !== -1 && receiverIdx !== -1) {
+    teamList[senderIdx].wallet = (teamList[senderIdx].wallet || 0) - amount;
+    teamList[receiverIdx].wallet = (teamList[receiverIdx].wallet || 0) + amount;
+    localStorage.setItem('ct_team', JSON.stringify(teamList));
+  }
+
+  const transferLog = {
+    id: Date.now(),
+    date: getTodayDateStr(),
+    spentBy: senderName,
+    category: "Wallet Fund Transfer",
+    amount: amount,
+    paidTo: receiverName,
+    remarks: note
+  };
+
+  expenseList.unshift(transferLog);
+  localStorage.setItem('ct_expenses', JSON.stringify(expenseList));
+
+  filterExpenses();
+  closeTransferModal();
+  alert(`₹${amount} transferred successfully!`);
+}
+
+/* CATEGORY MANAGEMENT MODAL FUNCTIONS */
+function openCatModal() {
+  renderCategoryList();
+  document.getElementById('catModal').style.display = 'flex';
+}
+
+function closeCatModal() {
+  document.getElementById('catModal').style.display = 'none';
+}
+
+function renderCategoryList() {
+  const ul = document.getElementById('catListUl');
+  ul.innerHTML = "";
+  categoryList.forEach((c, idx) => {
+    ul.innerHTML += `
+      <li>
+        <span>${c}</span>
+        <button class="btn-del-cat" onclick="deleteCategory(${idx})"><i class="fa fa-trash"></i> Delete</button>
+      </li>
+    `;
+  });
+}
+
+function addCategory(evt) {
+  evt.preventDefault();
+  const input = document.getElementById('newCatInput');
+  const catVal = input.value.trim();
+
+  if(catVal && !categoryList.includes(catVal)) {
+    categoryList.push(catVal);
+    localStorage.setItem('ct_categories', JSON.stringify(categoryList));
+    input.value = "";
+    renderCategoryList();
+  } else if(categoryList.includes(catVal)) {
+    alert("This category already exists!");
+  }
+}
+
+function deleteCategory(idx) {
+  if(confirm("Are you sure you want to delete this category?")) {
+    categoryList.splice(idx, 1);
+    localStorage.setItem('ct_categories', JSON.stringify(categoryList));
+    renderCategoryList();
+  }
+}
+
+function openPage(page){ window.location.href = page; }
+function logout(){
+  if(confirm("Logout from CT Management Portal?")){
+    localStorage.removeItem('ct_active_user');
+    window.location.href = "login.html";
+  }
+}
+
+window.onload = checkUserSession;
+</script>
+</body>
+</html>

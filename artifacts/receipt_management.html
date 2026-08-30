@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Receipt Management - CT Management</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Poppins,sans-serif;
+}
+
+body{
+  background:#f2f5fa;
+  color: #333;
+}
+
+/* HEADER */
+.header{
+  height:65px;
+  background:#0b1f3a;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  color:white;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:999;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  color:#ffc107;
+  cursor:pointer;
+}
+
+.search{
+  flex:1;
+  margin:0 20px;
+}
+
+.search input{
+  width:100%;
+  padding:11px;
+  border:none;
+  border-radius:8px;
+  outline:none;
+}
+
+.icons{
+  display:flex;
+  gap:18px;
+  align-items:center;
+  font-size:20px;
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: 35px;
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;
+  top:65px;
+  left:0;
+  bottom:0;
+  width:240px;
+  background:#132c4f;
+  overflow-y:auto;
+}
+
+.sidebar ul{
+  list-style:none;
+}
+
+.sidebar ul li{
+  padding:16px 20px;
+  color:white;
+  cursor:pointer;
+  transition:.3s;
+  font-size:15px;
+}
+
+.sidebar ul li:hover, .sidebar ul li.active{
+  background:#ffc107;
+  color:black;
+}
+
+.sidebar ul li i{
+  width:30px;
+}
+
+/* MAIN */
+.main{
+  margin-left:240px;
+  margin-top:65px;
+  padding:20px;
+  min-height: calc(100vh - 65px);
+}
+
+.page-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.page-title h2 {
+  color: #0b1f3a;
+  font-size: 18px;
+}
+
+.btn-add {
+  background: #0b1f3a;
+  color: #ffc107;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-add:hover {
+  background: #132c4f;
+}
+
+/* FILTER CARD */
+.filter-card {
+  background: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.filter-group select, .filter-group input {
+  padding: 8px 12px;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  outline: none;
+  font-size: 13px;
+}
+
+/* TABLE CARD */
+.card-table {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #f0f2f5;
+  font-size: 13px;
+}
+
+th {
+  background: #f8fafc;
+  color: #0b1f3a;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.mode-badge {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.mode-upi { background: #e0e7ff; color: #3730a3; }
+.mode-cash { background: #dcfce7; color: #166534; }
+.mode-cheque { background: #fef3c7; color: #92400e; }
+
+.action-btn {
+  background: #f1f5f9;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #0b1f3a;
+  font-size: 12px;
+  font-weight: 500;
+  transition: 0.2s;
+  margin-right: 4px;
+}
+
+.action-btn:hover {
+  background: #ffc107;
+  color: #000;
+}
+
+.action-btn.delete {
+  color: #dc3545;
+}
+
+.action-btn.delete:hover {
+  background: #dc3545;
+  color: white;
+}
+
+/* MODAL */
+.modal-overlay{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,0.5);
+  z-index:1000;
+  justify-content:center;
+  align-items:center;
+  padding:15px;
+}
+
+.modal{
+  background:white;
+  width:100%;
+  max-width:650px;
+  border-radius:15px;
+  padding:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:2px solid #f2f5fa;
+  padding-bottom:12px;
+  margin-bottom:20px;
+}
+
+.modal-header h3{
+  color:#0b1f3a;
+  font-size:18px;
+}
+
+.modal-close{
+  font-size:20px;
+  cursor:pointer;
+  color:#777;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #444;
+}
+
+.form-group input, .form-group select {
+  padding: 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  outline: none;
+  font-size: 13px;
+}
+
+.btn-submit {
+  width: 100%;
+  background: #0b1f3a;
+  color: #ffc107;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* MOBILE NAV */
+.bottomnav{ display:none; }
+
+@media(max-width:900px){
+  .sidebar{ display:none; }
+  .main{ margin-left:0; padding-bottom:90px; }
+  .search{ display:none; }
+  .header{ padding:0 10px; }
+  .bottomnav{
+    display:flex;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    height:65px;
+    background:white;
+    justify-content:space-around;
+    align-items:center;
+    box-shadow:0 -2px 10px rgba(0,0,0,.1);
+    z-index:999;
+  }
+  .bottomnav i{ font-size:22px; color:#0b1f3a; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo" onclick="openPage('super_admin_dashboard.html')">CT Management</div>
+  <div class="search">
+    <input type="text" id="receiptSearch" placeholder="Search Receipt by S.R. No, Party, Receiver..." onkeyup="filterReceipts()">
+  </div>
+  <div class="icons">
+    <i class="fa fa-bell" style="cursor:pointer;" title="Notifications"></i>
+    <span class="notification-badge" id="notifBadge">1</span>
+    <i class="fa fa-user-circle" onclick="logout()" title="Logout / Profile"></i>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <ul>
+    <li onclick="openPage('super_admin_dashboard.html')"><i class="fa fa-house"></i> Dashboard</li>
+    <li onclick="openPage('employee_management.html')"><i class="fa fa-users"></i> Employee Management</li>
+    <li onclick="openPage('party_management.html')"><i class="fa fa-user-group"></i> Party Management</li>
+    <li class="active" onclick="openPage('receipt_management.html')"><i class="fa fa-wallet"></i> Receipt Management</li>
+    <li onclick="openPage('expense_management.html')"><i class="fa fa-money-bill-wave"></i> Expense Management</li>
+    <li onclick="openPage('employee_wallet.html')"><i class="fa fa-briefcase"></i> Employee Wallet</li>
+    <li onclick="openPage('dispatch_management.html')"><i class="fa fa-truck"></i> Dispatch Management</li>
+    <li onclick="openPage('stock_management.html')"><i class="fa fa-cubes"></i> Stock Management</li>
+    <li onclick="openPage('production_management.html')"><i class="fa fa-industry"></i> Production</li>
+    <li onclick="openPage('dchallan_management.html')"><i class="fa fa-file-lines"></i> D Challan</li>
+    <li onclick="openPage('reports.html')"><i class="fa fa-chart-column"></i> Reports</li>
+    <li onclick="openPage('settings.html')"><i class="fa fa-gear"></i> Settings</li>
+    <li onclick="logout()"><i class="fa fa-right-from-bracket"></i> Logout</li>
+  </ul>
+</div>
+
+<!-- MAIN AREA -->
+<div class="main">
+
+  <div class="page-title">
+    <h2><i class="fa fa-wallet" style="color:#ffc107;"></i> Receipt Vouchers & Payment History</h2>
+    <button class="btn-add" id="addReceiptBtn" onclick="openReceiptModal()"><i class="fa fa-plus"></i> Add New Receipt</button>
+  </div>
+
+  <!-- ADVANCED DATE & PERIOD FILTER BAR -->
+  <div class="filter-card">
+    <div class="filter-group">
+      <label><i class="fa fa-filter" style="color:#0b1f3a;"></i> Time Period:</label>
+      <select id="timePeriodFilter" onchange="applyTimePeriodFilter()">
+        <option value="all">All Time</option>
+        <option value="today">Today</option>
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+        <option value="year">This Year</option>
+        <option value="custom">Custom Date Range</option>
+      </select>
+    </div>
+
+    <div class="filter-group" id="customDateRange" style="display:none;">
+      <label>From:</label>
+      <input type="date" id="filterFromDate" onchange="filterReceipts()">
+      <label>To:</label>
+      <input type="date" id="filterToDate" onchange="filterReceipts()">
+    </div>
+
+    <div class="filter-group">
+      <label>Receiver Route:</label>
+      <select id="filterReceiverRoute" onchange="filterReceipts()">
+        <option value="all">All Routes</option>
+        <option value="Employee">Employee Wallet</option>
+        <option value="Supplier / Creditor / Contractor">Supplier / Contractor</option>
+        <option value="Direct Expense">Direct Expenses</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card-table">
+    <table>
+      <thead>
+        <tr>
+          <th>S.R. No</th>
+          <th>Date</th>
+          <th>Party Name</th>
+          <th>Received Amount</th>
+          <th>Payment Mode</th>
+          <th>Received By (Receiver)</th>
+          <th>Category Route</th>
+          <th>Remarks</th>
+          <th id="actionHeader">Action</th>
+        </tr>
+      </thead>
+      <tbody id="receiptTableBody">
+        <!-- JS Dynamic Table Rows -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADD / EDIT RECEIPT VOUCHER MODAL -->
+<div class="modal-overlay" id="receiptModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle"><i class="fa fa-receipt" style="color:#ffc107;"></i> Create New Receipt Voucher</h3>
+      <i class="fa fa-xmark modal-close" onclick="closeReceiptModal()"></i>
+    </div>
+
+    <form id="receiptForm" onsubmit="saveReceipt(event)">
+      <input type="hidden" id="editReceiptId">
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Voucher / S.R. Number</label>
+          <input type="text" id="srNumber" readonly style="background:#f8fafc; font-weight:600; color:#0b1f3a;">
+        </div>
+
+        <div class="form-group">
+          <label>Date (Back-Date Entry Supported)</label>
+          <input type="date" id="receiptDate" required>
+        </div>
+
+        <!-- SEARCHABLE PARTY SELECTOR -->
+        <div class="form-group" style="grid-column: span 2;">
+          <label>Search & Select Party *</label>
+          <input type="text" id="partySearchInput" placeholder="Type party name to quick search..." onkeyup="filterPartyOptions()" style="margin-bottom: 5px;">
+          <select id="partySelect" size="4" required style="height: 100px;">
+            <!-- Dynamic Party Options -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Amount Received (₹) *</label>
+          <input type="number" id="receiptAmount" placeholder="Enter Amount" required min="1">
+        </div>
+
+        <div class="form-group">
+          <label>Payment Mode *</label>
+          <select id="paymentMode" required>
+            <option value="UPI / Online">UPI / Online Transfer</option>
+            <option value="Cash">Cash</option>
+            <option value="Cheque / Bank">Cheque / Bank Transfer</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Receiver Type (Flow Route) *</label>
+          <select id="receiverType" onchange="handleReceiverTypeChange()" required>
+            <option value="Employee">Employee (Credit to Employee Wallet)</option>
+            <option value="Supplier / Creditor / Contractor">Supplier / Creditor / Contractor (Auto Expense Sync)</option>
+            <option value="Direct Expense">Expenses (Direct Operating Costs)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Receiver Name / Head *</label>
+          <select id="receiverName" required>
+            <!-- Dynamic Receiver List -->
+          </select>
+        </div>
+
+        <div class="form-group" style="grid-column: span 2;">
+          <label>Remarks / Notes</label>
+          <input type="text" id="receiptRemarks" placeholder="Optional payment or bill reference details">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">Submit Receipt Voucher</button>
+    </form>
+  </div>
+</div>
+
+<!-- BOTTOM MOBILE NAVIGATION -->
+<div class="bottomnav">
+  <i class="fa fa-house" onclick="openPage('super_admin_dashboard.html')"></i>
+  <i class="fa fa-users" onclick="openPage('employee_management.html')"></i>
+  <i class="fa fa-wallet" onclick="openPage('employee_wallet.html')"></i>
+  <i class="fa fa-chart-column" onclick="openPage('reports.html')"></i>
+  <i class="fa fa-gear" onclick="openPage('settings.html')"></i>
+</div>
+
+<script>
+let activeUser = null;
+let receiptList = [];
+let partyList = [];
+let teamList = [];
+
+function checkUserSession() {
+  const session = localStorage.getItem('ct_active_user');
+  if(!session) {
+    window.location.href = "login.html";
+    return;
+  }
+  activeUser = JSON.parse(session);
+
+  // Permission Check: Super Admin and Admin can add, edit, delete receipts
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+  if(!isAdmin) {
+    document.getElementById('addReceiptBtn').style.display = "none";
+    document.getElementById('actionHeader').style.display = "none";
+  }
+
+  loadMasterData();
+}
+
+function loadMasterData() {
+  partyList = JSON.parse(localStorage.getItem('ct_parties') || '[]');
+  teamList = JSON.parse(localStorage.getItem('ct_team') || '[]');
+  receiptList = JSON.parse(localStorage.getItem('ct_receipts') || '[]');
+
+  if(receiptList.length === 0) {
+    // Default Demo Receipt Data
+    receiptList = [
+      { id: 1, srNo: "SR-1001", date: "2026-03-28", party: "Patna Infra Corp", amount: 50000, mode: "UPI / Online", receiver: "Monu Kumar", receiverType: "Employee", remarks: "Advance for 60mm I-Shape" },
+      { id: 2, srNo: "SR-1002", date: "2026-03-29", party: "Maa Durga Constructions", amount: 25000, mode: "Cash", receiver: "Sipara Contractor Ledger", receiverType: "Supplier / Creditor / Contractor", remarks: "Site delivery partial clearance" }
+    ];
+    localStorage.setItem('ct_receipts', JSON.stringify(receiptList));
+  }
+
+  renderTable(receiptList);
+}
+
+function renderTable(list) {
+  const tbody = document.getElementById('receiptTableBody');
+  tbody.innerHTML = "";
+
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+
+  list.forEach((r) => {
+    let modeClass = "mode-upi";
+    if(r.mode === "Cash") modeClass = "mode-cash";
+    else if(r.mode.includes("Cheque")) modeClass = "mode-cheque";
+
+    const actionTd = isAdmin ? `
+      <td>
+        <button class="action-btn" onclick="editReceipt(${r.id})" title="Edit Receipt">
+          <i class="fa fa-pen-to-square"></i> Edit
+        </button>
+        <button class="action-btn delete" onclick="deleteReceipt(${r.id})" title="Delete Receipt">
+          <i class="fa fa-trash"></i>
+        </button>
+      </td>` : '';
+
+    tbody.innerHTML += `
+      <tr>
+        <td><strong>${r.srNo}</strong></td>
+        <td>${r.date}</td>
+        <td><strong>${r.party}</strong></td>
+        <td><strong style="color:#059669;">₹${parseFloat(r.amount).toLocaleString('en-IN')}</strong></td>
+        <td><span class="mode-badge ${modeClass}">${r.mode}</span></td>
+        <td>${r.receiver}</td>
+        <td><small style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${r.receiverType}</small></td>
+        <td>${r.remarks || '-'}</td>
+        ${actionTd}
+      </tr>
+    `;
+  });
+}
+
+// TIME PERIOD FILTER LOGIC
+function applyTimePeriodFilter() {
+  const filterType = document.getElementById('timePeriodFilter').value;
+  const customDiv = document.getElementById('customDateRange');
+
+  if(filterType === "custom") {
+    customDiv.style.display = "flex";
+  } else {
+    customDiv.style.display = "none";
+  }
+  filterReceipts();
+}
+
+function filterReceipts() {
+  const searchQuery = document.getElementById('receiptSearch').value.toLowerCase();
+  const timePeriod = document.getElementById('timePeriodFilter').value;
+  const routeFilter = document.getElementById('filterReceiverRoute').value;
+
+  const now = new Date();
+
+  const filtered = receiptList.filter(r => {
+    const rDate = new Date(r.date);
+    
+    // Text search filter
+    const matchesQuery = r.srNo.toLowerCase().includes(searchQuery) ||
+                         r.party.toLowerCase().includes(searchQuery) ||
+                         r.receiver.toLowerCase().includes(searchQuery);
+
+    // Route filter
+    const matchesRoute = (routeFilter === "all") || (r.receiverType === routeFilter);
+
+    // Date/Time filter
+    let matchesTime = true;
+    if(timePeriod === "today") {
+      matchesTime = r.date === now.toISOString().split('T')[0];
+    } else if(timePeriod === "week") {
+      const oneWeekAgo = new Date(now);
+      oneWeekAgo.setDate(now.getDate() - 7);
+      matchesTime = rDate >= oneWeekAgo && rDate <= now;
+    } else if(timePeriod === "month") {
+      matchesTime = rDate.getMonth() === now.getMonth() && rDate.getFullYear() === now.getFullYear();
+    } else if(timePeriod === "year") {
+      matchesTime = rDate.getFullYear() === now.getFullYear();
+    } else if(timePeriod === "custom") {
+      const from = document.getElementById('filterFromDate').value;
+      const to = document.getElementById('filterToDate').value;
+      if(from && to) {
+        matchesTime = r.date >= from && r.date <= to;
+      }
+    }
+
+    return matchesQuery && matchesRoute && matchesTime;
+  });
+
+  renderTable(filtered);
+}
+
+// SEARCHABLE PARTY SELECTOR IN MODAL
+function populateParties(selectedParty = "") {
+  const partySelect = document.getElementById('partySelect');
+  partySelect.innerHTML = "";
+  
+  if(partyList.length === 0) {
+    partySelect.innerHTML = `<option value="">No parties found</option>`;
+    return;
+  }
+
+  partyList.forEach((p, idx) => {
+    const option = document.createElement('option');
+    option.value = p.name;
+    option.textContent = `${p.name} (${p.address || 'Patna'}) - Dues: ₹${p.dues || 0}`;
+    if(selectedParty === p.name || idx === 0) option.selected = true;
+    partySelect.appendChild(option);
+  });
+}
+
+function filterPartyOptions() {
+  const query = document.getElementById('partySearchInput').value.toLowerCase();
+  const partySelect = document.getElementById('partySelect');
+  const options = partySelect.options;
+
+  for(let i = 0; i < options.length; i++) {
+    const txt = options[i].textContent.toLowerCase();
+    options[i].style.display = txt.includes(query) ? "" : "none";
+  }
+}
+
+function openReceiptModal() {
+  document.getElementById('receiptForm').reset();
+  document.getElementById('editReceiptId').value = "";
+  document.getElementById('modalTitle').innerHTML = '<i class="fa fa-receipt" style="color:#ffc107;"></i> Create New Receipt Voucher';
+  document.getElementById('submitBtn').innerText = "Submit Receipt Voucher";
+
+  // Auto Generate S.R. No
+  const nextSr = "SR-" + (1001 + receiptList.length);
+  document.getElementById('srNumber').value = nextSr;
+  document.getElementById('receiptDate').value = new Date().toISOString().split('T')[0];
+
+  populateParties();
+  handleReceiverTypeChange();
+  document.getElementById('receiptModal').style.display = 'flex';
+}
+
+function handleReceiverTypeChange(selectedReceiver = "") {
+  const type = document.getElementById('receiverType').value;
+  const receiverSelect = document.getElementById('receiverName');
+  receiverSelect.innerHTML = "";
+
+  if(type === "Employee") {
+    teamList.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.name;
+      opt.textContent = `${t.name} (${t.role})`;
+      if(selectedReceiver === t.name) opt.selected = true;
+      receiverSelect.appendChild(opt);
+    });
+  } else if(type === "Supplier / Creditor / Contractor") {
+    const contractors = [
+      "Sipara Contractor Ledger",
+      "Nandlal Chhapra Contractor Ledger",
+      "Cement / Raw Material Supplier",
+      "Transport / Freight Contractor"
+    ];
+    contractors.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      if(selectedReceiver === c) opt.selected = true;
+      receiverSelect.appendChild(opt);
+    });
+  } else if(type === "Direct Expense") {
+    const expenseHeads = [
+      "Plant Maintenance Expense",
+      "Diesel & Generator Fuel",
+      "Electricity & Utility Bills",
+      "Office & Miscellaneous Expense"
+    ];
+    expenseHeads.forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e;
+      opt.textContent = e;
+      if(selectedReceiver === e) opt.selected = true;
+      receiverSelect.appendChild(opt);
+    });
+  }
+}
+
+function closeReceiptModal() {
+  document.getElementById('receiptModal').style.display = 'none';
+}
+
+// EDIT RECEIPT
+function editReceipt(id) {
+  const r = receiptList.find(item => item.id == id);
+  if(!r) return;
+
+  document.getElementById('editReceiptId').value = r.id;
+  document.getElementById('srNumber').value = r.srNo;
+  document.getElementById('receiptDate').value = r.date;
+  document.getElementById('receiptAmount').value = r.amount;
+  document.getElementById('paymentMode').value = r.mode;
+  document.getElementById('receiverType').value = r.receiverType;
+  document.getElementById('receiptRemarks').value = r.remarks || "";
+
+  populateParties(r.party);
+  handleReceiverTypeChange(r.receiver);
+
+  document.getElementById('modalTitle').innerHTML = '<i class="fa fa-pen-to-square" style="color:#ffc107;"></i> Edit Receipt Voucher';
+  document.getElementById('submitBtn').innerText = "Update Receipt Voucher";
+  document.getElementById('receiptModal').style.display = 'flex';
+}
+
+// SAVE / UPDATE RECEIPT VOUCHER
+function saveReceipt(e) {
+  e.preventDefault();
+
+  const editId = document.getElementById('editReceiptId').value;
+  const srNo = document.getElementById('srNumber').value;
+  const date = document.getElementById('receiptDate').value;
+  const party = document.getElementById('partySelect').value;
+  const amount = parseFloat(document.getElementById('receiptAmount').value);
+  const mode = document.getElementById('paymentMode').value;
+  const receiverType = document.getElementById('receiverType').value;
+  const receiver = document.getElementById('receiverName').value;
+  const remarks = document.getElementById('receiptRemarks').value;
+
+  if(!party) {
+    alert("Kripya ek party choose karein!");
+    return;
+  }
+
+  if(editId) {
+    // UPDATE EXISTING ENTRY
+    const idx = receiptList.findIndex(item => item.id == editId);
+    if(idx !== -1) {
+      receiptList[idx] = { id: Number(editId), srNo, date, party, amount, mode, receiverType, receiver, remarks };
+    }
+  } else {
+    // CREATE NEW ENTRY
+    const newReceipt = {
+      id: Date.now(),
+      srNo, date, party, amount, mode, receiverType, receiver, remarks
+    };
+    receiptList.unshift(newReceipt);
+  }
+
+  localStorage.setItem('ct_receipts', JSON.stringify(receiptList));
+
+  // ROUTE LOGIC 1: CREDIT TO EMPLOYEE WALLET
+  if(receiverType === "Employee") {
+    const empIdx = teamList.findIndex(t => t.name === receiver);
+    if(empIdx !== -1) {
+      teamList[empIdx].currentWalletBalance = (teamList[empIdx].currentWalletBalance || teamList[empIdx].walletLimit || 0) + amount;
+      localStorage.setItem('ct_team', JSON.stringify(teamList));
+    }
+  }
+
+  // ROUTE LOGIC 2 & 3: EXPENSE LEDGER AUTO-SYNC (Supplier/Contractor/Expense)
+  if(receiverType === "Supplier / Creditor / Contractor" || receiverType === "Direct Expense") {
+    let expenseList = JSON.parse(localStorage.getItem('ct_expenses') || '[]');
+    expenseList.unshift({
+      id: Date.now(),
+      voucherNo: "EXP-" + srNo,
+      date: date,
+      head: receiver,
+      amount: amount,
+      paidTo: party,
+      mode: mode,
+      remarks: `Auto synced from Receipt (${srNo}): ${remarks}`
+    });
+    localStorage.setItem('ct_expenses', JSON.stringify(expenseList));
+  }
+
+  // DEDUCT PARTY DUES AUTOMATICALLY
+  const partyIdx = partyList.findIndex(p => p.name === party);
+  if(partyIdx !== -1) {
+    partyList[partyIdx].dues = Math.max(0, (partyList[partyIdx].dues || 0) - amount);
+    localStorage.setItem('ct_parties', JSON.stringify(partyList));
+  }
+
+  // SYSTEM BROADCAST NOTIFICATION
+  const notifs = JSON.parse(localStorage.getItem('ct_notifications') || '[]');
+  notifs.unshift({
+    id: Date.now(),
+    title: "Receipt Voucher Processed",
+    msg: `₹${amount.toLocaleString('en-IN')} received from ${party} routed to ${receiver}`,
+    time: "Just Now",
+    type: "receipt"
+  });
+  localStorage.setItem('ct_notifications', JSON.stringify(notifs));
+
+  renderTable(receiptList);
+  closeReceiptModal();
+  alert("Receipt Voucher successfully saved and ledgers updated!");
+}
+
+// DELETE RECEIPT
+function deleteReceipt(id) {
+  if(confirm("Kya aap is Receipt entry ko remove karna chahte hain?")) {
+    receiptList = receiptList.filter(item => item.id != id);
+    localStorage.setItem('ct_receipts', JSON.stringify(receiptList));
+    renderTable(receiptList);
+  }
+}
+
+function openPage(page){ window.location.href = page; }
+function logout(){
+  if(confirm("Logout from CT Management Portal?")){
+    localStorage.removeItem('ct_active_user');
+    window.location.href = "login.html";
+  }
+}
+
+window.onload = checkUserSession;
+</script>
+</body>
+</html>

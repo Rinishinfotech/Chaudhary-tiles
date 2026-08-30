@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Stock Management - CT Management</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; font-family:Poppins,sans-serif; }
+body{ background:#f2f5fa; color: #333; }
+
+/* HEADER */
+.header{
+  height:65px; background:#0b1f3a; display:flex; align-items:center;
+  justify-content:space-between; padding:0 18px; color:white; position:fixed;
+  top:0; left:0; right:0; z-index:999;
+}
+.logo{ font-size:20px; font-weight:700; color:#ffc107; cursor:pointer; }
+.search{ flex:1; margin:0 20px; }
+.search input{ width:100%; padding:10px 14px; border:none; border-radius:8px; outline:none; font-size:14px; }
+.icons{ display:flex; gap:18px; align-items:center; font-size:20px; position: relative; }
+.notification-badge {
+  position: absolute; top: -5px; right: 35px; background: #dc3545; color: white;
+  border-radius: 50%; padding: 2px 6px; font-size: 10px; font-weight: bold;
+}
+
+/* SIDEBAR */
+.sidebar{ position:fixed; top:65px; left:0; bottom:0; width:240px; background:#132c4f; overflow-y:auto; }
+.sidebar ul{ list-style:none; }
+.sidebar ul li{ padding:15px 20px; color:white; cursor:pointer; transition:.3s; font-size:14px; }
+.sidebar ul li:hover, .sidebar ul li.active{ background:#ffc107; color:black; font-weight: 600; }
+.sidebar ul li i{ width:28px; }
+
+/* MAIN AREA */
+.main{ margin-left:240px; margin-top:65px; padding:20px; min-height: calc(100vh - 65px); }
+.page-title {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
+  background: white; padding: 16px 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+  flex-wrap: wrap; gap: 12px;
+}
+.page-title h2 { color: #0b1f3a; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+.action-bar { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-action {
+  background: #0b1f3a; color: #ffc107; border: none; padding: 10px 16px;
+  border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px; transition: 0.2s;
+}
+.btn-action:hover { background: #132c4f; }
+.btn-secondary { background: #2563eb; color: white; }
+.btn-secondary:hover { background: #1d4ed8; }
+
+/* PLANT TABS */
+.plant-tabs {
+  display: flex; gap: 10px; margin-bottom: 15px; background: white; padding: 8px;
+  border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.tab-btn {
+  flex: 1; padding: 12px 10px; text-align: center; border: 1px solid transparent;
+  background: #f8fafc; font-weight: 600; font-size: 14px; color: #475569; cursor: pointer;
+  border-radius: 8px; transition: 0.3s;
+}
+.tab-btn.active { background: #0b1f3a; color: #ffc107; border-color: #0b1f3a; }
+
+/* SUMMARY BAR */
+.summary-bar {
+  background: #e2e8f0; padding: 12px 18px; border-radius: 10px; display: flex;
+  justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
+}
+.summary-stats { display: flex; gap: 15px; font-size: 13px; font-weight: 600; color: #0b1f3a; }
+.stat-pill { background: white; padding: 4px 10px; border-radius: 20px; border: 1px solid #cbd5e1; }
+
+/* GRID CARDS */
+.stock-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 18px; margin-bottom: 25px; }
+.stock-card { background: white; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; }
+.stock-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+.card-header-banner { background: #0b1f3a; color: white; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; }
+.card-header-banner .company-title { font-size: 11px; color: #ffc107; font-weight: 700; text-transform: uppercase; }
+.card-header-banner .timestamp { font-size: 10px; color: #94a3b8; }
+.card-main-info { padding: 16px; }
+.item-title-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.item-name { font-size: 16px; font-weight: 700; color: #0b1f3a; }
+.plant-tag { background: #f1f5f9; color: #334155; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #cbd5e1; }
+.stock-count-box { display: flex; align-items: baseline; gap: 8px; margin-top: 6px; }
+.stock-num { font-size: 28px; font-weight: 700; color: #0b1f3a; }
+.stock-unit { font-size: 13px; color: #64748b; font-weight: 600; }
+.low-stock-badge { background: #fee2e2; color: #dc3545; font-size: 11px; padding: 4px 10px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; }
+.dropdown-trigger { margin-top: 14px; padding-top: 10px; border-top: 1px dashed #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #2563eb; font-weight: 600; cursor: pointer; }
+
+/* COLOR BREAKDOWN PANEL */
+.color-breakdown-panel { display: none; background: #f8fafc; padding: 14px; border-top: 1px solid #e2e8f0; }
+.color-breakdown-panel.show { display: block; }
+.color-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #edf2f7; font-size: 13px; }
+.color-item:last-child { border-bottom: none; }
+.color-name { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+.color-dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; border: 1px solid rgba(0,0,0,0.2); }
+.dot-red { background: #ef4444; } .dot-yellow { background: #eab308; } .dot-white { background: #ffffff; border: 1px solid #94a3b8; } .dot-grey { background: #64748b; } .dot-black { background: #1e293b; } .dot-other { background: #8b5cf6; }
+
+/* MODALS */
+.modal-overlay{ display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; padding:15px; }
+.modal{ background:white; width:100%; max-width:560px; border-radius:14px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+.modal-header{ display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #f2f5fa; padding-bottom:10px; margin-bottom:18px; }
+.modal-header h3{ color:#0b1f3a; font-size:17px; }
+.modal-close{ font-size:20px; cursor:pointer; color:#777; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 18px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label { font-size: 12px; font-weight: 600; color: #444; }
+.form-group input, .form-group select { padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 13px; }
+.color-inputs-box { background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px; }
+.color-inputs-box h5 { font-size: 12px; color: #0b1f3a; margin-bottom: 10px; }
+.btn-submit { width: 100%; background: #0b1f3a; color: #ffc107; border: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; }
+.admin-only-tag { background: #fef3c7; color: #92400e; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 6px; }
+
+/* MOBILE NAV */
+.bottomnav{ display:none; }
+@media(max-width:900px){
+  .sidebar{ display:none; } .main{ margin-left:0; padding-bottom:90px; } .search{ display:none; } .header{ padding:0 10px; } .plant-tabs { flex-direction: column; }
+  .bottomnav{ display:flex; position:fixed; bottom:0; left:0; right:0; height:65px; background:white; justify-content:space-around; align-items:center; box-shadow:0 -2px 10px rgba(0,0,0,.1); z-index:999; }
+  .bottomnav i{ font-size:22px; color:#0b1f3a; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo" onclick="openPage('super_admin_dashboard.html')">CT Management</div>
+  <div class="search">
+    <input type="text" id="stockSearch" placeholder="Search Item, Pattern, Color or Plant..." onkeyup="filterStockCards()">
+  </div>
+  <div class="icons">
+    <i class="fa fa-bell" style="cursor:pointer;" title="Notifications"></i>
+    <span class="notification-badge" id="notifBadge">0</span>
+    <i class="fa fa-user-circle" onclick="logout()" title="Logout / Profile"></i>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <ul>
+    <li onclick="openPage('super_admin_dashboard.html')"><i class="fa fa-house"></i> Dashboard</li>
+    <li onclick="openPage('employee_management.html')"><i class="fa fa-users"></i> Employee Management</li>
+    <li onclick="openPage('party_management.html')"><i class="fa fa-user-group"></i> Party Management</li>
+    <li onclick="openPage('receipt_management.html')"><i class="fa fa-wallet"></i> Receipt Management</li>
+    <li onclick="openPage('expense_management.html')"><i class="fa fa-money-bill-wave"></i> Expense Management</li>
+    <li onclick="openPage('employee_wallet.html')"><i class="fa fa-briefcase"></i> Employee Wallet</li>
+    <li onclick="openPage('dispatch_management.html')"><i class="fa fa-truck"></i> Dispatch Management</li>
+    <li class="active" onclick="openPage('stock_management.html')"><i class="fa fa-cubes"></i> Stock Management</li>
+    <li onclick="openPage('production_management.html')"><i class="fa fa-industry"></i> Production</li>
+    <li onclick="openPage('dchallan_management.html')"><i class="fa fa-file-lines"></i> D Challan</li>
+    <li onclick="openPage('reports.html')"><i class="fa fa-chart-column"></i> Reports</li>
+    <li onclick="openPage('settings.html')"><i class="fa fa-gear"></i> Settings</li>
+    <li onclick="logout()"><i class="fa fa-right-from-bracket"></i> Logout</li>
+  </ul>
+</div>
+
+<!-- MAIN AREA -->
+<div class="main">
+
+  <div class="page-title">
+    <h2><i class="fa fa-cubes" style="color:#ffc107;"></i> Live Stock & Inventory Master</h2>
+    
+    <div class="action-bar" id="adminActionBar" style="display:none;">
+      <button class="btn-action btn-secondary" onclick="openStockAdjModal()">
+        <i class="fa fa-pen-to-square"></i> Adjust Stock Qty
+      </button>
+      <button class="btn-action" onclick="openNewItemModal()">
+        <i class="fa fa-plus-circle"></i> Add New Item Master
+      </button>
+    </div>
+  </div>
+
+  <!-- PLANT TABS -->
+  <div class="plant-tabs">
+    <button class="tab-btn active" id="tabAll" onclick="switchPlantTab('ALL')">
+      <i class="fa fa-warehouse"></i> All Plants Combined
+    </button>
+    <button class="tab-btn" id="tabSipara" onclick="switchPlantTab('Sipara Plant')">
+      <i class="fa fa-industry"></i> Sipara Plant
+    </button>
+    <button class="tab-btn" id="tabNandlal" onclick="switchPlantTab('Nandlal Chhapra Plant')">
+      <i class="fa fa-industry"></i> Nandlal Chhapra Plant
+    </button>
+  </div>
+
+  <!-- SUMMARY BAR -->
+  <div class="summary-bar">
+    <div class="summary-stats">
+      <span class="stat-pill">Total Items: <strong id="statTotalItems">0</strong></span>
+      <span class="stat-pill" style="color:#dc3545;">Low Stock Warning: <strong id="statLowStock">0</strong></span>
+    </div>
+    <div>
+      <label style="font-size:12px; font-weight:600; color:#0b1f3a;"><i class="fa fa-clock-rotate-left"></i> Date Filter: </label>
+      <input type="date" id="stockHistoryDate" onchange="loadStockForDate()" style="padding:4px 8px; border-radius:6px; border:1px solid #cbd5e1;">
+    </div>
+  </div>
+
+  <!-- STOCK CARDS GRID -->
+  <div class="stock-grid" id="stockContainer">
+    <!-- Dynamic Cards via JS -->
+  </div>
+
+</div>
+
+<!-- CREATE NEW ITEM MODAL -->
+<div class="modal-overlay" id="newItemModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa fa-box-archive" style="color:#ffc107;"></i> Create New Item Master <span class="admin-only-tag">ADMIN</span></h3>
+      <i class="fa fa-xmark modal-close" onclick="closeNewItemModal()"></i>
+    </div>
+
+    <form onsubmit="saveNewItemMaster(event)">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Item / Pattern Name</label>
+          <input type="text" id="newItemName" placeholder="e.g. Zebra 60mm Paver Block" required>
+        </div>
+        <div class="form-group">
+          <label>Plant Location</label>
+          <select id="newItemPlant" required>
+            <option value="Sipara Plant">Sipara Plant</option>
+            <option value="Nandlal Chhapra Plant">Nandlal Chhapra Plant</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Unit Measurement</label>
+          <select id="newItemUnit" required>
+            <option value="Pcs">Pcs (Tiles/Blocks)</option>
+            <option value="Bags">Bags (Cement)</option>
+            <option value="CFT">CFT (Sand/Aggregate)</option>
+            <option value="KG">KG (Pigment/Chemicals)</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Low Stock Warning Limit</label>
+          <input type="number" id="newItemMinLimit" placeholder="e.g. 5000" required>
+        </div>
+      </div>
+
+      <div class="color-inputs-box">
+        <h5>Initial Color Quantity Setup (Optional):</h5>
+        <div class="form-grid">
+          <div class="form-group"><label>Red (Pcs)</label><input type="number" id="initRed" value="0" min="0"></div>
+          <div class="form-group"><label>Yellow (Pcs)</label><input type="number" id="initYellow" value="0" min="0"></div>
+          <div class="form-group"><label>White (Pcs)</label><input type="number" id="initWhite" value="0" min="0"></div>
+          <div class="form-group"><label>Grey (Pcs)</label><input type="number" id="initGrey" value="0" min="0"></div>
+          <div class="form-group"><label>Black (Pcs)</label><input type="number" id="initBlack" value="0" min="0"></div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">Save Item Master</button>
+    </form>
+  </div>
+</div>
+
+<!-- ADJUST STOCK MODAL -->
+<div class="modal-overlay" id="stockAdjModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa fa-sliders" style="color:#ffc107;"></i> Adjust Stock Quantity <span class="admin-only-tag">ADMIN</span></h3>
+      <i class="fa fa-xmark modal-close" onclick="closeStockAdjModal()"></i>
+    </div>
+
+    <form onsubmit="saveStockAdjustment(event)">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Select Item Master</label>
+          <select id="adjItemId" required></select>
+        </div>
+        <div class="form-group">
+          <label>Color Specification</label>
+          <select id="adjColor" required>
+            <option value="Red">Red</option>
+            <option value="Yellow">Yellow</option>
+            <option value="White">White</option>
+            <option value="Grey">Grey</option>
+            <option value="Black">Black</option>
+            <option value="General/NA">General / NA</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Action</label>
+          <select id="adjAction" required>
+            <option value="ADD">Add (+) Stock</option>
+            <option value="DEDUCT">Deduct (-) Stock</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Quantity to Adjust</label>
+          <input type="number" id="adjQty" placeholder="Enter quantity" required min="1">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">Update Balance Now</button>
+    </form>
+  </div>
+</div>
+
+<!-- BOTTOM MOBILE NAV -->
+<div class="bottomnav">
+  <i class="fa fa-house" onclick="openPage('super_admin_dashboard.html')"></i>
+  <i class="fa fa-users" onclick="openPage('employee_management.html')"></i>
+  <i class="fa fa-wallet" onclick="openPage('receipt_management.html')"></i>
+  <i class="fa fa-chart-column" onclick="openPage('reports.html')"></i>
+  <i class="fa fa-gear" onclick="openPage('settings.html')"></i>
+</div>
+
+<script>
+let activeUser = null;
+let currentSelectedPlant = "ALL";
+let stockMaster = [];
+
+function checkUserSession() {
+  const session = localStorage.getItem('ct_active_user');
+  if(!session) {
+    activeUser = { role: "Super Admin", name: "Admin User" };
+    localStorage.setItem('ct_active_user', JSON.stringify(activeUser));
+  } else {
+    activeUser = JSON.parse(session);
+  }
+
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+  if(isAdmin) {
+    document.getElementById('adminActionBar').style.display = "flex";
+  }
+
+  document.getElementById('stockHistoryDate').value = new Date().toISOString().split('T')[0];
+  loadStockMaster();
+}
+
+function formatDateDisplay(dateStr) {
+  if(!dateStr) return '';
+  const parts = dateStr.split('-');
+  if(parts.length !== 3) return dateStr;
+  return `${parts[2]}-${parts[1]}-${parts[0].slice(-2)}`;
+}
+
+function loadStockMaster() {
+  const stored = localStorage.getItem('ct_stock_master_v2');
+  if(stored) {
+    stockMaster = JSON.parse(stored);
+    
+    // Auto replace old UltraTech PPC name with simple PPC Cement
+    let migrated = false;
+    stockMaster.forEach(item => {
+      if(item.name === "UltraTech PPC Cement") {
+        item.name = "PPC Cement";
+        migrated = true;
+      }
+    });
+    if(migrated) localStorage.setItem('ct_stock_master_v2', JSON.stringify(stockMaster));
+
+  } else {
+    stockMaster = [
+      { id: "STK-101", name: "I-Shape Paver Block (60mm)", plant: "Sipara Plant", unit: "Pcs", minLimit: 10000, colors: { Red: 5000, Yellow: 3000, White: 1000, Grey: 4000, Black: 2000 } },
+      { id: "STK-102", name: "Zebra 60mm Paver Block", plant: "Nandlal Chhapra Plant", unit: "Pcs", minLimit: 12000, colors: { Red: 4000, Yellow: 3000, White: 2000, Black: 5000 } },
+      { id: "STK-103", name: "Hexagonal 60mm Paver", plant: "Sipara Plant", unit: "Pcs", minLimit: 5000, colors: { Red: 2000, Grey: 1500, White: 500 } },
+      { id: "STK-104", name: "PPC Cement", plant: "Sipara Plant", unit: "Bags", minLimit: 100, colors: { "General/NA": 280 } },
+      { id: "STK-105", name: "OPC 53 Grade Cement", plant: "Sipara Plant", unit: "Bags", minLimit: 100, colors: { "General/NA": 150 } },
+      { id: "STK-106", name: "PPC Cement", plant: "Nandlal Chhapra Plant", unit: "Bags", minLimit: 100, colors: { "General/NA": 200 } },
+      { id: "STK-107", name: "OPC 53 Grade Cement", plant: "Nandlal Chhapra Plant", unit: "Bags", minLimit: 100, colors: { "General/NA": 100 } }
+    ];
+    localStorage.setItem('ct_stock_master_v2', JSON.stringify(stockMaster));
+  }
+
+  ensureCementStockExists();
+  renderStockCards();
+}
+
+function ensureCementStockExists() {
+  let updated = false;
+  const plants = ["Sipara Plant", "Nandlal Chhapra Plant"];
+  const cements = ["PPC Cement", "OPC 53 Grade Cement"];
+
+  plants.forEach(plant => {
+    cements.forEach(cName => {
+      const found = stockMaster.find(s => s.name === cName && s.plant === plant);
+      if(!found) {
+        stockMaster.push({
+          id: "STK-" + Date.now() + Math.floor(Math.random()*100),
+          name: cName,
+          plant: plant,
+          unit: "Bags",
+          minLimit: 50,
+          colors: { "General/NA": 100 }
+        });
+        updated = true;
+      }
+    });
+  });
+
+  if(updated) {
+    localStorage.setItem('ct_stock_master_v2', JSON.stringify(stockMaster));
+  }
+}
+
+function switchPlantTab(plantName) {
+  currentSelectedPlant = plantName;
+  document.getElementById('tabAll').classList.remove('active');
+  document.getElementById('tabSipara').classList.remove('active');
+  document.getElementById('tabNandlal').classList.remove('active');
+
+  if(plantName === 'ALL') document.getElementById('tabAll').classList.add('active');
+  else if(plantName === 'Sipara Plant') document.getElementById('tabSipara').classList.add('active');
+  else if(plantName === 'Nandlal Chhapra Plant') document.getElementById('tabNandlal').classList.add('active');
+
+  renderStockCards();
+}
+
+function renderStockCards() {
+  const container = document.getElementById('stockContainer');
+  const searchQ = document.getElementById('stockSearch').value.toLowerCase();
+  container.innerHTML = "";
+
+  let lowStockCount = 0;
+  let totalDisplayedItems = 0;
+  const todayFormatted = formatDateDisplay(new Date().toISOString().split('T')[0]);
+
+  stockMaster.forEach((item, index) => {
+    if(currentSelectedPlant !== "ALL" && item.plant !== currentSelectedPlant) return;
+
+    const matchesSearch = item.name.toLowerCase().includes(searchQ) || item.plant.toLowerCase().includes(searchQ);
+    if(!matchesSearch) return;
+
+    totalDisplayedItems++;
+
+    let totalQty = 0;
+    for(let col in item.colors) {
+      totalQty += item.colors[col];
+    }
+
+    const isLowStock = totalQty <= item.minLimit;
+    if(isLowStock) lowStockCount++;
+
+    let colorListHtml = "";
+    for(let col in item.colors) {
+      let dotClass = "dot-other";
+      if(col === "Red") dotClass = "dot-red";
+      else if(col === "Yellow") dotClass = "dot-yellow";
+      else if(col === "White") dotClass = "dot-white";
+      else if(col === "Grey") dotClass = "dot-grey";
+      else if(col === "Black") dotClass = "dot-black";
+
+      colorListHtml += `
+        <div class="color-item">
+          <span class="color-name"><span class="color-dot ${dotClass}"></span> ${col}</span>
+          <strong>${item.colors[col].toLocaleString()} ${item.unit}</strong>
+        </div>
+      `;
+    }
+
+    const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+    const deleteBtn = isAdmin ? `<i class="fa fa-trash" style="color:#ef4444; cursor:pointer;" title="Delete Item Master" onclick="deleteItemMaster('${item.id}', event)"></i>` : '';
+
+    container.innerHTML += `
+      <div class="stock-card">
+        <div class="card-header-banner">
+          <span class="company-title"><i class="fa fa-industry"></i> Chaudhary Tiles</span>
+          <span class="timestamp">${todayFormatted}</span>
+        </div>
+        <div class="card-main-info">
+          <div class="item-title-row">
+            <span class="item-name">${item.name}</span>
+            <span class="plant-tag">${item.plant}</span>
+          </div>
+          
+          <div class="stock-count-box">
+            <span class="stock-num">${totalQty.toLocaleString()}</span>
+            <span class="stock-unit">${item.unit} Total</span>
+          </div>
+
+          ${isLowStock ? `<div class="low-stock-badge"><i class="fa fa-triangle-exclamation"></i> Low Stock (Limit: ${item.minLimit.toLocaleString()} ${item.unit})</div>` : ''}
+
+          <div class="dropdown-trigger" onclick="toggleDropdown('panel_${index}')">
+            <span><i class="fa fa-palette"></i> View Color / Stock Breakdown</span>
+            <div style="display:flex; gap:12px; align-items:center;">
+              ${deleteBtn}
+              <i class="fa fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-breakdown-panel" id="panel_${index}">
+          <h5 style="font-size:11px; color:#64748b; text-transform:uppercase; margin-bottom:8px;">Stock Breakdown:</h5>
+          ${colorListHtml}
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('notifBadge').innerText = lowStockCount;
+  document.getElementById('statTotalItems').innerText = totalDisplayedItems;
+  document.getElementById('statLowStock').innerText = lowStockCount;
+}
+
+function toggleDropdown(panelId) {
+  document.getElementById(panelId).classList.toggle('show');
+}
+
+function filterStockCards() { renderStockCards(); }
+function loadStockForDate() { renderStockCards(); }
+
+function openNewItemModal() { document.getElementById('newItemModal').style.display = "flex"; }
+function closeNewItemModal() { document.getElementById('newItemModal').style.display = "none"; }
+
+function saveNewItemMaster(e) {
+  e.preventDefault();
+  const name = document.getElementById('newItemName').value;
+  const plant = document.getElementById('newItemPlant').value;
+  const unit = document.getElementById('newItemUnit').value;
+  const minLimit = parseInt(document.getElementById('newItemMinLimit').value || 0);
+
+  const r = parseInt(document.getElementById('initRed').value || 0);
+  const y = parseInt(document.getElementById('initYellow').value || 0);
+  const w = parseInt(document.getElementById('initWhite').value || 0);
+  const g = parseInt(document.getElementById('initGrey').value || 0);
+  const b = parseInt(document.getElementById('initBlack').value || 0);
+
+  const colorsObj = {};
+  if(r > 0) colorsObj["Red"] = r;
+  if(y > 0) colorsObj["Yellow"] = y;
+  if(w > 0) colorsObj["White"] = w;
+  if(g > 0) colorsObj["Grey"] = g;
+  if(b > 0) colorsObj["Black"] = b;
+
+  if(Object.keys(colorsObj).length === 0) colorsObj["General/NA"] = 0;
+
+  const newItem = {
+    id: "STK-" + Date.now(),
+    name, plant, unit, minLimit,
+    colors: colorsObj
+  };
+
+  stockMaster.unshift(newItem);
+  localStorage.setItem('ct_stock_master_v2', JSON.stringify(stockMaster));
+
+  renderStockCards();
+  closeNewItemModal();
+  alert(`New Item '${name}' created successfully!`);
+}
+
+function deleteItemMaster(itemId, e) {
+  e.stopPropagation();
+  if(confirm("क्या आप इस स्टॉक आइटम को डिलीट करना चाहते हैं?")) {
+    stockMaster = stockMaster.filter(i => i.id !== itemId);
+    localStorage.setItem('ct_stock_master_v2', JSON.stringify(stockMaster));
+    renderStockCards();
+  }
+}
+
+function openStockAdjModal() {
+  const select = document.getElementById('adjItemId');
+  select.innerHTML = "";
+  stockMaster.forEach(item => {
+    select.innerHTML += `<option value="${item.id}">${item.name} (${item.plant})</option>`;
+  });
+  document.getElementById('stockAdjModal').style.display = "flex";
+}
+
+function closeStockAdjModal() { document.getElementById('stockAdjModal').style.display = "none"; }
+
+function saveStockAdjustment(e) {
+  e.preventDefault();
+  const itemId = document.getElementById('adjItemId').value;
+  const color = document.getElementById('adjColor').value;
+  const action = document.getElementById('adjAction').value;
+  const qty = parseInt(document.getElementById('adjQty').value);
+
+  const idx = stockMaster.findIndex(i => i.id === itemId);
+  if(idx !== -1) {
+    if(!stockMaster[idx].colors[color]) stockMaster[idx].colors[color] = 0;
+
+    if(action === "ADD") stockMaster[idx].colors[color] += qty;
+    else stockMaster[idx].colors[color] = Math.max(0, stockMaster[idx].colors[color] - qty);
+
+    localStorage.setItem('ct_stock_master_v2', JSON.stringify(stockMaster));
+    renderStockCards();
+    closeStockAdjModal();
+    alert("Stock adjusted successfully!");
+  }
+}
+
+function openPage(page){ window.location.href = page; }
+function logout(){
+  if(confirm("Logout from CT Management Portal?")){
+    localStorage.removeItem('ct_active_user');
+    window.location.href = "login.html";
+  }
+}
+
+window.onload = checkUserSession;
+</script>
+</body>
+</html>

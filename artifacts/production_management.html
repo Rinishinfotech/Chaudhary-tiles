@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Production Management - CT Management</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; font-family:Poppins,sans-serif; }
+body{ background:#f2f5fa; color: #333; }
+
+/* HEADER */
+.header{
+  height:65px; background:#0b1f3a; display:flex; align-items:center;
+  justify-content:space-between; padding:0 18px; color:white; position:fixed;
+  top:0; left:0; right:0; z-index:999;
+}
+.logo{ font-size:20px; font-weight:700; color:#ffc107; cursor:pointer; }
+.search{ flex:1; margin:0 20px; }
+.search input{ width:100%; padding:10px 14px; border:none; border-radius:8px; outline:none; font-size:14px; }
+.icons{ display:flex; gap:18px; align-items:center; font-size:20px; position: relative; }
+
+/* SIDEBAR */
+.sidebar{ position:fixed; top:65px; left:0; bottom:0; width:240px; background:#132c4f; overflow-y:auto; }
+.sidebar ul{ list-style:none; }
+.sidebar ul li{ padding:15px 20px; color:white; cursor:pointer; transition:.3s; font-size:14px; }
+.sidebar ul li:hover, .sidebar ul li.active{ background:#ffc107; color:black; font-weight: 600; }
+.sidebar ul li i{ width:28px; }
+
+/* MAIN AREA */
+.main{ margin-left:240px; margin-top:65px; padding:20px; min-height: calc(100vh - 65px); }
+.page-title {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
+  background: white; padding: 16px 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+  flex-wrap: wrap; gap: 12px;
+}
+.page-title h2 { color: #0b1f3a; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+.action-bar { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-action {
+  background: #0b1f3a; color: #ffc107; border: none; padding: 10px 16px;
+  border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px; transition: 0.2s;
+}
+.btn-action:hover { background: #132c4f; }
+.btn-cement { background: #059669; color: white; }
+.btn-cement:hover { background: #047857; }
+
+/* PLANT TABS */
+.plant-tabs {
+  display: flex; gap: 10px; margin-bottom: 15px; background: white; padding: 8px;
+  border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.tab-btn {
+  flex: 1; padding: 12px 10px; text-align: center; border: 1px solid transparent;
+  background: #f8fafc; font-weight: 600; font-size: 14px; color: #475569; cursor: pointer;
+  border-radius: 8px; transition: 0.3s;
+}
+.tab-btn.active { background: #0b1f3a; color: #ffc107; border-color: #0b1f3a; }
+
+/* SUMMARY BAR */
+.summary-bar {
+  background: #e2e8f0; padding: 12px 18px; border-radius: 10px; display: flex;
+  justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
+}
+.summary-stats { display: flex; gap: 15px; font-size: 13px; font-weight: 600; color: #0b1f3a; }
+.stat-pill { background: white; padding: 4px 12px; border-radius: 20px; border: 1px solid #cbd5e1; }
+
+/* PRODUCTION CARDS LIST */
+.production-list { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.prod-card { background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+.prod-card-header {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
+}
+.prod-date-badge { background: #0b1f3a; color: #ffc107; font-weight: 700; padding: 4px 10px; border-radius: 6px; font-size: 13px; }
+.prod-plant-badge { background: #e2e8f0; color: #1e293b; font-weight: 600; padding: 4px 10px; border-radius: 6px; font-size: 12px; }
+.off-badge { background: #fee2e2; color: #dc3545; font-weight: 700; padding: 4px 12px; border-radius: 6px; font-size: 12px; display: inline-flex; align-items: center; gap: 5px; }
+
+.prod-items-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+.prod-items-table th, .prod-items-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #f1f5f9; }
+.prod-items-table th { background: #f8fafc; color: #475569; font-weight: 600; }
+.cement-usage-tag { margin-top: 10px; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block; }
+
+/* MODALS */
+.modal-overlay{ display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; padding:15px; }
+.modal{ background:white; width:100%; max-width:620px; border-radius:14px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+.modal-header{ display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #f2f5fa; padding-bottom:10px; margin-bottom:18px; }
+.modal-header h3{ color:#0b1f3a; font-size:17px; }
+.modal-close{ font-size:20px; cursor:pointer; color:#777; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 15px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label { font-size: 12px; font-weight: 600; color: #444; }
+.form-group input, .form-group select { padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 13px; }
+
+.off-toggle-box { background: #fff5f5; border: 1px solid #fecaca; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+.off-toggle-box input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+.off-toggle-box label { font-size: 13px; font-weight: 700; color: #dc3545; cursor: pointer; }
+
+.items-entry-box { background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px; }
+.items-entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.items-entry-header h5 { font-size: 13px; color: #0b1f3a; }
+.row-item { display: grid; grid-template-columns: 2fr 1fr 1fr 35px; gap: 8px; align-items: center; margin-bottom: 8px; }
+.btn-remove-row { color: #ef4444; cursor: pointer; text-align: center; font-size: 16px; }
+.btn-add-row { background: #e2e8f0; color: #0b1f3a; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-submit { width: 100%; background: #0b1f3a; color: #ffc107; border: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; }
+.admin-note { font-size: 11px; color: #2563eb; font-weight: 600; }
+
+/* MOBILE NAV */
+.bottomnav{ display:none; }
+@media(max-width:900px){
+  .sidebar{ display:none; } .main{ margin-left:0; padding-bottom:90px; } .search{ display:none; } .header{ padding:0 10px; } .plant-tabs { flex-direction: column; }
+  .bottomnav{ display:flex; position:fixed; bottom:0; left:0; right:0; height:65px; background:white; justify-content:space-around; align-items:center; box-shadow:0 -2px 10px rgba(0,0,0,.1); z-index:999; }
+  .bottomnav i{ font-size:22px; color:#0b1f3a; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo" onclick="openPage('super_admin_dashboard.html')">CT Management</div>
+  <div class="search">
+    <input type="text" id="prodSearch" placeholder="Search Item, Plant or Date..." onkeyup="renderProductionLogs()">
+  </div>
+  <div class="icons">
+    <i class="fa fa-bell" style="cursor:pointer;" title="Notifications"></i>
+    <i class="fa fa-user-circle" onclick="logout()" title="Logout / Profile"></i>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <ul>
+    <li onclick="openPage('super_admin_dashboard.html')"><i class="fa fa-house"></i> Dashboard</li>
+    <li onclick="openPage('employee_management.html')"><i class="fa fa-users"></i> Employee Management</li>
+    <li onclick="openPage('party_management.html')"><i class="fa fa-user-group"></i> Party Management</li>
+    <li onclick="openPage('receipt_management.html')"><i class="fa fa-wallet"></i> Receipt Management</li>
+    <li onclick="openPage('expense_management.html')"><i class="fa fa-money-bill-wave"></i> Expense Management</li>
+    <li onclick="openPage('employee_wallet.html')"><i class="fa fa-briefcase"></i> Employee Wallet</li>
+    <li onclick="openPage('dispatch_management.html')"><i class="fa fa-truck"></i> Dispatch Management</li>
+    <li onclick="openPage('stock_management.html')"><i class="fa fa-cubes"></i> Stock Management</li>
+    <li class="active" onclick="openPage('production_management.html')"><i class="fa fa-industry"></i> Production</li>
+    <li onclick="openPage('dchallan_management.html')"><i class="fa fa-file-lines"></i> D Challan</li>
+    <li onclick="openPage('reports.html')"><i class="fa fa-chart-column"></i> Reports</li>
+    <li onclick="openPage('settings.html')"><i class="fa fa-gear"></i> Settings</li>
+    <li onclick="logout()"><i class="fa fa-right-from-bracket"></i> Logout</li>
+  </ul>
+</div>
+
+<!-- MAIN AREA -->
+<div class="main">
+
+  <div class="page-title">
+    <h2><i class="fa fa-industry" style="color:#ffc107;"></i> Daily Production Register</h2>
+    
+    <div class="action-bar">
+      <button class="btn-action btn-cement" onclick="openInwardCementModal()">
+        <i class="fa fa-truck-ramp-box"></i> Add Cement Supply (Inward)
+      </button>
+      <button class="btn-action" onclick="openProductionModal()">
+        <i class="fa fa-plus-circle"></i> Daily Production Entry
+      </button>
+    </div>
+  </div>
+
+  <!-- PLANT TABS -->
+  <div class="plant-tabs">
+    <button class="tab-btn active" id="tabAll" onclick="switchPlantTab('ALL')">
+      <i class="fa fa-warehouse"></i> All Plants
+    </button>
+    <button class="tab-btn" id="tabSipara" onclick="switchPlantTab('Sipara Plant')">
+      <i class="fa fa-industry"></i> Sipara Plant
+    </button>
+    <button class="tab-btn" id="tabNandlal" onclick="switchPlantTab('Nandlal Chhapra Plant')">
+      <i class="fa fa-industry"></i> Nandlal Chhapra Plant
+    </button>
+  </div>
+
+  <!-- SUMMARY BAR -->
+  <div class="summary-bar">
+    <div class="summary-stats">
+      <span class="stat-pill">Total Production Pcs Today: <strong id="statTodayPcs">0</strong></span>
+      <span class="stat-pill">Cement Consumed Today: <strong id="statTodayCement">0 Bags</strong></span>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <label style="font-size:12px; font-weight:600; color:#0b1f3a;"><i class="fa fa-calendar-days"></i> Select Date: </label>
+      <input type="date" id="filterDate" onchange="renderProductionLogs()" style="padding:5px 10px; border-radius:6px; border:1px solid #cbd5e1; font-weight:600;">
+      <button onclick="clearDateFilter()" style="padding:5px 10px; background:#64748b; color:white; border:none; border-radius:6px; font-size:12px; cursor:pointer;">Show All Dates</button>
+    </div>
+  </div>
+
+  <!-- PRODUCTION LOGS LIST -->
+  <div class="production-list" id="productionContainer">
+    <!-- Dynamic Production Records via JS -->
+  </div>
+
+</div>
+
+<!-- DAILY PRODUCTION ENTRY MODAL -->
+<div class="modal-overlay" id="productionModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="prodModalTitle"><i class="fa fa-square-plus" style="color:#ffc107;"></i> Daily Production Entry</h3>
+      <i class="fa fa-xmark modal-close" onclick="closeProductionModal()"></i>
+    </div>
+
+    <form onsubmit="saveProductionEntry(event)">
+      <input type="hidden" id="editingLogId" value="">
+      
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Production Date</label>
+          <input type="date" id="prodDate" required>
+          <span class="admin-note" id="dateLockNote"></span>
+        </div>
+        <div class="form-group">
+          <label>Plant Location</label>
+          <select id="prodPlant" required onchange="populateItemDropdowns()">
+            <option value="Sipara Plant">Sipara Plant</option>
+            <option value="Nandlal Chhapra Plant">Nandlal Chhapra Plant</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="off-toggle-box">
+        <input type="checkbox" id="isOffToggle" onchange="handleOffToggle()">
+        <label for="isOffToggle"><i class="fa fa-circle-pause"></i> Production Off Today (उत्पादन बंद / छुट्टी)</label>
+      </div>
+
+      <!-- ITEMS MANUFACTURED SECTION -->
+      <div class="items-entry-box" id="itemsSection">
+        <div class="items-entry-header">
+          <h5><i class="fa fa-cubes"></i> Items Manufactured Today:</h5>
+          <button type="button" class="btn-add-row" onclick="addItemRow()"><i class="fa fa-plus"></i> Add Another Item</button>
+        </div>
+        <div id="itemRowsContainer"></div>
+      </div>
+
+      <!-- CEMENT CONSUMPTION SECTION -->
+      <div class="items-entry-box" id="cementSection">
+        <h5><i class="fa fa-cubes-stacked"></i> Daily Cement Used (Consumption):</h5>
+        <div class="form-grid" style="margin-bottom:0; margin-top:8px;">
+          <div class="form-group">
+            <label>OPC 53 Grade Cement Used (Bags -)</label>
+            <input type="number" id="prodOpcBags" value="0" min="0" placeholder="e.g. 10">
+          </div>
+          <div class="form-group">
+            <label>PPC Cement Used (Bags -)</label>
+            <input type="number" id="prodPpcBags" value="0" min="0" placeholder="e.g. 15">
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">Save & Update Live Stock</button>
+    </form>
+  </div>
+</div>
+
+<!-- INWARD CEMENT SUPPLY MODAL -->
+<div class="modal-overlay" id="inwardCementModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa fa-truck-moving" style="color:#059669;"></i> Add Cement Supply Inward (+)</h3>
+      <i class="fa fa-xmark modal-close" onclick="closeInwardCementModal()"></i>
+    </div>
+
+    <form onsubmit="saveInwardCement(event)">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Inward Date</label>
+          <input type="date" id="inwardDate" required>
+        </div>
+        <div class="form-group">
+          <label>Plant Location</label>
+          <select id="inwardPlant" required>
+            <option value="Sipara Plant">Sipara Plant</option>
+            <option value="Nandlal Chhapra Plant">Nandlal Chhapra Plant</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Cement Grade / Type</label>
+          <select id="inwardCementName" required>
+            <option value="OPC 53 Grade Cement">OPC 53 Grade Cement</option>
+            <option value="PPC Cement">PPC Cement</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Received Bags Quantity (+)</label>
+          <input type="number" id="inwardBags" placeholder="e.g. 200" required min="1">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" style="background:#059669; color:white;">Add to Cement Stock</button>
+    </form>
+  </div>
+</div>
+
+<!-- BOTTOM MOBILE NAV -->
+<div class="bottomnav">
+  <i class="fa fa-house" onclick="openPage('super_admin_dashboard.html')"></i>
+  <i class="fa fa-users" onclick="openPage('employee_management.html')"></i>
+  <i class="fa fa-wallet" onclick="openPage('receipt_management.html')"></i>
+  <i class="fa fa-chart-column" onclick="openPage('reports.html')"></i>
+  <i class="fa fa-gear" onclick="openPage('settings.html')"></i>
+</div>
+
+<script>
+let activeUser = null;
+let currentSelectedPlant = "ALL";
+let stockMaster = [];
+let productionLogs = [];
+
+function checkUserSession() {
+  const session = localStorage.getItem('ct_active_user');
+  if(!session) {
+    activeUser = { role: "Super Admin", name: "Admin User" };
+    localStorage.setItem('ct_active_user', JSON.stringify(activeUser));
+  } else {
+    activeUser = JSON.parse(session);
+  }
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  document.getElementById('filterDate').value = todayStr;
+  document.getElementById('prodDate').value = todayStr;
+  document.getElementById('inwardDate').value = todayStr;
+
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+  if(!isAdmin) {
+    document.getElementById('prodDate').readOnly = true;
+    document.getElementById('dateLockNote').innerText = "*Only Admin can enter back-dated production.";
+  }
+
+  loadStockAndLogs();
+}
+
+function formatDateDisplay(dateStr) {
+  if(!dateStr) return '';
+  const parts = dateStr.split('-');
+  if(parts.length !== 3) return dateStr;
+  return `${parts[2]}-${parts[1]}-${parts[0].slice(-2)}`;
+}
+
+function loadStockAndLogs() {
+  const storedStock = localStorage.getItem('ct_stock_master_v2');
+  if(storedStock) {
+    stockMaster = JSON.parse(storedStock);
+
+    let migrated = false;
+    stockMaster.forEach(item => {
+      if(item.name === "UltraTech PPC Cement") {
+        item.name = "PPC Cement";
+        migrated = true;
+      }
+    });
+    if(migrated) localStorage.setItem('ct_stock_master_v2', JSON.stringify(stockMaster));
+
+  } else {
+    stockMaster = [
+      { id: "STK-101", name: "I-Shape Paver Block (60mm)", plant: "Sipara Plant", unit: "Pcs", minLimit: 10000, colors: { Red: 5000, Yellow: 3000, White: 1000, Grey: 4000, Black: 2000 } },
+      { id: "STK-102", name: "Zebra 60mm Paver Block", plant: "Nandlal Chhapra Plant", unit: "Pcs", minLimit: 12000, colors: { Red: 4000, Yellow: 3000, White: 2000, Black: 5000 } },
+      { id: "STK-103", name: "Hexagonal 60mm Paver", plant: "Sipara Plant", unit: "Pcs", minLimit: 5000, colors: { Red: 2000, Grey: 1500, White: 500 } },
+      { id: "STK-104", name: "PPC Cement", plant: "Sipara Plant", unit: "Bags", minLimit: 100, colors: { "General/NA": 280 } },
+      { id: "STK-105", name: "OPC 53 Grade Cement", plant: "Sipara Plant", unit: "Bags", minLimit: 100, colors: { "General/NA": 150 } },
+      { id: "STK-106", name: "PPC Cement", plant: "Nandlal Chhapra Plant", unit: "Bags", minLimit: 100, colors: { "General/NA": 200 } },
+      { id: "STK-107", name: "OPC 53 Grade Cement", plant: "Nandlal Chhapra Plant", unit: "Bags", minLimit: 100, colors: { "General/NA": 100 } }
+    ];
+    localStorage.setItem('ct_stock_master_v2', JSON.stringify(stockMaster));
+  }
+
+  ensureCementStockExists();
+
+  const storedLogs = localStorage.getItem('ct_production_logs_v1');
+  productionLogs = storedLogs ? JSON.parse(storedLogs) : [];
+
+  renderProductionLogs();
+}
+
+function ensureCementStockExists() {
+  let updated = false;
+  const plants = ["Sipara Plant", "Nandlal Chhapra Plant"];
+  const cements = ["PPC Cement", "OPC 53 Grade Cement"];
+
+  plants.forEach(plant => {
+    cements.forEach(cName => {
+      const found = stockMaster.find(s => s.name === cName && s.plant === plant);
+      if(!found) {
+        stockMaster.push({
+          id: "STK-" + Date.now() + Math.floor(Math.random()*100),
+          name: cName,
+          plant: plant,
+          unit: "Bags",
+          minLimit: 50,
+          colors: { "General/NA": 100 }
+        });
+        updated = true;
+      }
+    });
+  });
+
+  if(updated) {
+    localStorage.setItem('ct_stock_master_v2', JSON.stringify(stockMaster));
+  }
+}
+
+function switchPlantTab(plantName) {
+  currentSelectedPlant = plantName;
+  document.getElementById('tabAll').classList.remove('active');
+  document.getElementById('tabSipara').classList.remove('active');
+  document.getElementById('tabNandlal').classList.remove('active');
+
+  if(plantName === 'ALL') document.getElementById('tabAll').classList.add('active');
+  else if(plantName === 'Sipara Plant') document.getElementById('tabSipara').classList.add('active');
+  else if(plantName === 'Nandlal Chhapra Plant') document.getElementById('tabNandlal').classList.add('active');
+
+  renderProductionLogs();
+}
+
+function clearDateFilter() {
+  document.getElementById('filterDate').value = "";
+  renderProductionLogs();
+}
+
+function renderProductionLogs() {
+  const container = document.getElementById('productionContainer');
+  const searchQ = document.getElementById('prodSearch').value.toLowerCase();
+  const filterDate = document.getElementById('filterDate').value;
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  container.innerHTML = "";
+  let todayPcs = 0;
+  let todayCement = 0;
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+
+  productionLogs.forEach((log) => {
+    if(log.date === todayStr) {
+      if(log.items) log.items.forEach(it => todayPcs += (it.qty || 0));
+      todayCement += (log.ppcBags || 0) + (log.opcBags || 0);
+    }
+
+    if(currentSelectedPlant !== "ALL" && log.plant !== currentSelectedPlant) return;
+    if(filterDate && log.date !== filterDate) return;
+
+    const matchesSearch = log.plant.toLowerCase().includes(searchQ) || 
+                          log.date.includes(searchQ) || 
+                          (log.items && log.items.some(i => i.itemName.toLowerCase().includes(searchQ)));
+    if(!matchesSearch) return;
+
+    let itemsTableHtml = "";
+    if(log.isOff) {
+      itemsTableHtml = `<div class="off-badge"><i class="fa fa-circle-pause"></i> Production Off (छुट्टी / काम बंद)</div>`;
+    } else {
+      let rowsHtml = "";
+      log.items.forEach(it => {
+        rowsHtml += `
+          <tr>
+            <td><strong>${it.itemName}</strong></td>
+            <td><span class="color-dot dot-${it.color.toLowerCase()}"></span> ${it.color}</td>
+            <td><strong>${it.qty.toLocaleString()} Pcs</strong></td>
+          </tr>
+        `;
+      });
+
+      itemsTableHtml = `
+        <table class="prod-items-table">
+          <thead>
+            <tr>
+              <th>Item / Pattern</th>
+              <th>Color</th>
+              <th>Quantity Produced</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      `;
+    }
+
+    let cementTag = "";
+    if(!log.isOff && ((log.ppcBags || 0) > 0 || (log.opcBags || 0) > 0)) {
+      cementTag = `<div class="cement-usage-tag"><i class="fa fa-cubes-stacked"></i> Cement Consumed: OPC 53: ${log.opcBags || 0} Bags | PPC: ${log.ppcBags || 0} Bags</div>`;
+    }
+
+    const adminActions = isAdmin ? `
+      <div style="display:flex; gap:10px;">
+        <i class="fa fa-pen-to-square" style="color:#2563eb; cursor:pointer;" title="Edit Entry" onclick="editProductionLog('${log.id}')"></i>
+        <i class="fa fa-trash" style="color:#ef4444; cursor:pointer;" title="Delete Entry" onclick="deleteProductionLog('${log.id}')"></i>
+      </div>
+    ` : '';
+
+    container.innerHTML += `
+      <div class="prod-card">
+        <div class="prod-card-header">
+          <div style="display:flex; gap:10px; align-items:center;">
+            <span class="prod-date-badge"><i class="fa fa-calendar"></i> ${formatDateDisplay(log.date)}</span>
+            <span class="prod-plant-badge"><i class="fa fa-industry"></i> ${log.plant}</span>
+          </div>
+          ${adminActions}
+        </div>
+        ${itemsTableHtml}
+        ${cementTag}
+      </div>
+    `;
+  });
+
+  document.getElementById('statTodayPcs').innerText = todayPcs.toLocaleString() + " Pcs";
+  document.getElementById('statTodayCement').innerText = todayCement.toLocaleString() + " Bags";
+}
+
+function openProductionModal() {
+  document.getElementById('editingLogId').value = "";
+  document.getElementById('prodModalTitle').innerHTML = `<i class="fa fa-square-plus" style="color:#ffc107;"></i> Daily Production Entry`;
+  document.getElementById('isOffToggle').checked = false;
+  handleOffToggle();
+
+  document.getElementById('itemRowsContainer').innerHTML = "";
+  addItemRow();
+
+  document.getElementById('prodPpcBags').value = 0;
+  document.getElementById('prodOpcBags').value = 0;
+
+  document.getElementById('productionModal').style.display = "flex";
+}
+
+function closeProductionModal() { document.getElementById('productionModal').style.display = "none"; }
+
+function handleOffToggle() {
+  const isOff = document.getElementById('isOffToggle').checked;
+  document.getElementById('itemsSection').style.display = isOff ? "none" : "block";
+  document.getElementById('cementSection').style.display = isOff ? "none" : "block";
+}
+
+function populateItemDropdowns() {
+  const currentPlant = document.getElementById('prodPlant').value;
+  const selects = document.querySelectorAll('.item-select-dd');
+  const plantItems = stockMaster.filter(s => s.plant === currentPlant && s.unit !== "Bags");
+
+  selects.forEach(sel => {
+    const val = sel.value;
+    sel.innerHTML = "";
+    if(plantItems.length === 0) {
+      sel.innerHTML = `<option value="">No Items Available in Master</option>`;
+    } else {
+      plantItems.forEach(i => {
+        sel.innerHTML += `<option value="${i.id}">${i.name}</option>`;
+      });
+      if(val) sel.value = val;
+    }
+  });
+}
+
+function addItemRow() {
+  const container = document.getElementById('itemRowsContainer');
+  const rowId = "row_" + Date.now() + Math.floor(Math.random()*100);
+
+  const rowDiv = document.createElement('div');
+  rowDiv.className = 'row-item';
+  rowDiv.id = rowId;
+
+  rowDiv.innerHTML = `
+    <select class="item-select-dd" required></select>
+    <select class="color-select-dd" required>
+      <option value="Red">Red</option>
+      <option value="Yellow">Yellow</option>
+      <option value="White">White</option>
+      <option value="Grey">Grey</option>
+      <option value="Black">Black</option>
+    </select>
+    <input type="number" placeholder="Qty Pcs" min="1" required class="qty-input">
+    <span class="btn-remove-row" onclick="removeRow('${rowId}')"><i class="fa fa-trash"></i></span>
+  `;
+
+  container.appendChild(rowDiv);
+  populateItemDropdowns();
+}
+
+function removeRow(rowId) {
+  const row = document.getElementById(rowId);
+  if(row) row.remove();
+}
+
+function saveProductionEntry(e) {
+  e.preventDefault();
+
+  const editingId = document.getElementById('editingLogId').value;
+  const pDate = document.getElementById('prodDate').value;
+  const plant = document.getElementById('prodPlant').value;
+  const isOff = document.getElementById('isOffToggle').checked;
+
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  if(!isAdmin && pDate !== todayStr) {
+    alert("Permission Denied: Only Admin can enter back-dated production.");
+    return;
+  }
+
+  if(editingId) revertStockForLog(editingId);
+
+  let itemsData = [];
+  let ppcBags = 0;
+  let opcBags = 0;
+
+  if(!isOff) {
+    const rowElements = document.querySelectorAll('#itemRowsContainer .row-item');
+    rowElements.forEach(row => {
+      const itemId = row.querySelector('.item-select-dd').value;
+      const color = row.querySelector('.color-select-dd').value;
+      const qty = parseInt(row.querySelector('.qty-input').value || 0);
+
+      const stItem = stockMaster.find(s => s.id === itemId);
+      if(stItem && qty > 0) {
+        itemsData.push({ itemId, itemName: stItem.name, color, qty });
+        if(!stItem.colors[color]) stItem.colors[color] = 0;
+        stItem.colors[color] += qty;
+      }
+    });
+
+    ppcBags = parseInt(document.getElementById('prodPpcBags').value || 0);
+    opcBags = parseInt(document.getElementById('prodOpcBags').value || 0);
+
+    if(ppcBags > 0) {
+      let ppcStock = stockMaster.find(s => s.name === "PPC Cement" && s.plant === plant);
+      if(ppcStock) {
+        ppcStock.colors["General/NA"] = Math.max(0, (ppcStock.colors["General/NA"] || 0) - ppcBags);
+      }
+    }
+
+    if(opcBags > 0) {
+      let opcStock = stockMaster.find(s => s.name === "OPC 53 Grade Cement" && s.plant === plant);
+      if(opcStock) {
+        opcStock.colors["General/NA"] = Math.max(0, (opcStock.colors["General/NA"] || 0) - opcBags);
+      }
+    }
+  }
+
+  const logEntry = {
+    id: editingId ? editingId : "PROD-" + Date.now(),
+    date: pDate, plant, isOff,
+    items: itemsData, ppcBags, opcBags,
+    createdBy: activeUser.name, timestamp: new Date().toISOString()
+  };
+
+  if(editingId) {
+    const idx = productionLogs.findIndex(l => l.id === editingId);
+    if(idx !== -1) productionLogs[idx] = logEntry;
+  } else {
+    productionLogs.unshift(logEntry);
+  }
+
+  localStorage.setItem('ct_stock_master_v2', JSON.stringify(stockMaster));
+  localStorage.setItem('ct_production_logs_v1', JSON.stringify(productionLogs));
+
+  renderProductionLogs();
+  closeProductionModal();
+  alert(`Production record saved successfully! Live Stock Updated.`);
+}
+
+function revertStockForLog(logId) {
+  const log = productionLogs.find(l => l.id === logId);
+  if(!log || log.isOff) return;
+
+  if(log.items) {
+    log.items.forEach(it => {
+      let stItem = stockMaster.find(s => s.id === it.itemId);
+      if(stItem && stItem.colors[it.color]) {
+        stItem.colors[it.color] = Math.max(0, stItem.colors[it.color] - it.qty);
+      }
+    });
+  }
+
+  if(log.ppcBags > 0) {
+    let ppcStock = stockMaster.find(s => s.name === "PPC Cement" && s.plant === log.plant);
+    if(ppcStock) ppcStock.colors["General/NA"] = (ppcStock.colors["General/NA"] || 0) + log.ppcBags;
+  }
+
+  if(log.opcBags > 0) {
+    let opcStock = stockMaster.find(s => s.name === "OPC 53 Grade Cement" && s.plant === log.plant);
+    if(opcStock) opcStock.colors["General/NA"] = (opcStock.colors["General/NA"] || 0) + log.opcBags;
+  }
+}
+
+function editProductionLog(logId) {
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+  if(!isAdmin) {
+    alert("Permission Denied: Only Admin can edit records.");
+    return;
+  }
+
+  const log = productionLogs.find(l => l.id === logId);
+  if(!log) return;
+
+  document.getElementById('editingLogId').value = log.id;
+  document.getElementById('prodModalTitle').innerHTML = `<i class="fa fa-pen-to-square" style="color:#ffc107;"></i> Edit Production Entry`;
+  document.getElementById('prodDate').value = log.date;
+  document.getElementById('prodPlant').value = log.plant;
+  document.getElementById('isOffToggle').checked = log.isOff;
+
+  handleOffToggle();
+
+  if(!log.isOff) {
+    document.getElementById('itemRowsContainer').innerHTML = "";
+    log.items.forEach(it => {
+      const container = document.getElementById('itemRowsContainer');
+      const rowId = "row_" + Date.now() + Math.floor(Math.random()*100);
+
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'row-item';
+      rowDiv.id = rowId;
+
+      rowDiv.innerHTML = `
+        <select class="item-select-dd" required></select>
+        <select class="color-select-dd" required>
+          <option value="Red" ${it.color==='Red'?'selected':''}>Red</option>
+          <option value="Yellow" ${it.color==='Yellow'?'selected':''}>Yellow</option>
+          <option value="White" ${it.color==='White'?'selected':''}>White</option>
+          <option value="Grey" ${it.color==='Grey'?'selected':''}>Grey</option>
+          <option value="Black" ${it.color==='Black'?'selected':''}>Black</option>
+        </select>
+        <input type="number" placeholder="Qty Pcs" min="1" required class="qty-input" value="${it.qty}">
+        <span class="btn-remove-row" onclick="removeRow('${rowId}')"><i class="fa fa-trash"></i></span>
+      `;
+
+      container.appendChild(rowDiv);
+      populateItemDropdowns();
+      rowDiv.querySelector('.item-select-dd').value = it.itemId;
+    });
+
+    document.getElementById('prodPpcBags').value = log.ppcBags || 0;
+    document.getElementById('prodOpcBags').value = log.opcBags || 0;
+  }
+
+  document.getElementById('productionModal').style.display = "flex";
+}
+
+function deleteProductionLog(logId) {
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+  if(!isAdmin) {
+    alert("Permission Denied: Only Admin can delete records.");
+    return;
+  }
+
+  if(confirm("क्या आप इस रिकॉर्ड को डिलीट करना चाहते हैं? इससे स्टॉक रिवर्स हो जाएगा।")) {
+    revertStockForLog(logId);
+    productionLogs = productionLogs.filter(l => l.id !== logId);
+
+    localStorage.setItem('ct_stock_master_v2', JSON.stringify(stockMaster));
+    localStorage.setItem('ct_production_logs_v1', JSON.stringify(productionLogs));
+
+    renderProductionLogs();
+    alert("Record deleted & stock reverted successfully!");
+  }
+}
+
+function openInwardCementModal() { document.getElementById('inwardCementModal').style.display = "flex"; }
+function closeInwardCementModal() { document.getElementById('inwardCementModal').style.display = "none"; }
+
+function saveInwardCement(e) {
+  e.preventDefault();
+  const plant = document.getElementById('inwardPlant').value;
+  const cementName = document.getElementById('inwardCementName').value;
+  const bags = parseInt(document.getElementById('inwardBags').value);
+
+  let cementItem = stockMaster.find(s => s.name === cementName && s.plant === plant);
+
+  if(!cementItem) {
+    cementItem = {
+      id: "STK-" + Date.now(),
+      name: cementName,
+      plant: plant,
+      unit: "Bags",
+      minLimit: 50,
+      colors: { "General/NA": bags }
+    };
+    stockMaster.push(cementItem);
+  } else {
+    if(!cementItem.colors["General/NA"]) cementItem.colors["General/NA"] = 0;
+    cementItem.colors["General/NA"] += bags;
+  }
+
+  localStorage.setItem('ct_stock_master_v2', JSON.stringify(stockMaster));
+
+  closeInwardCementModal();
+  alert(`${bags} Bags of ${cementName} added successfully to ${plant} Stock!`);
+}
+
+function openPage(page){ window.location.href = page; }
+function logout(){
+  if(confirm("Logout from CT Management Portal?")){
+    localStorage.removeItem('ct_active_user');
+    window.location.href = "login.html";
+  }
+}
+
+window.onload = checkUserSession;
+</script>
+</body>
+</html>

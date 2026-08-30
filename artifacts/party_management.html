@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Party Management - CT Management</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Poppins,sans-serif;
+}
+
+body{
+  background:#f2f5fa;
+  color: #333;
+}
+
+/* HEADER */
+.header{
+  height:65px;
+  background:#0b1f3a;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  color:white;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:999;
+}
+
+.logo{
+  font-size:20px;
+  font-weight:700;
+  color:#ffc107;
+  cursor:pointer;
+}
+
+.search{
+  flex:1;
+  margin:0 20px;
+}
+
+.search input{
+  width:100%;
+  padding:10px 14px;
+  border:none;
+  border-radius:8px;
+  outline:none;
+  font-size:13px;
+}
+
+.icons{
+  display:flex;
+  gap:15px;
+  align-items:center;
+  font-size:18px;
+  position: relative;
+}
+
+.notification-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* NOTIFICATION PANEL DROPDOWN */
+.notif-dropdown {
+  display: none;
+  position: absolute;
+  top: 40px;
+  right: -10px;
+  width: 310px;
+  background: white;
+  color: #333;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  border: 1px solid #e2e8f0;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.notif-dropdown.show {
+  display: block;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.notif-header {
+  background: #0b1f3a;
+  color: white;
+  padding: 12px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.notif-header span.clear-btn {
+  font-size: 11px;
+  color: #ffc107;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.notif-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.notif-item {
+  padding: 12px 15px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.notif-item:hover {
+  background: #f8fafc;
+}
+
+.notif-item i {
+  margin-top: 3px;
+  font-size: 14px;
+}
+
+.notif-empty {
+  padding: 20px;
+  text-align: center;
+  color: #888;
+  font-size: 12px;
+}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;
+  top:65px;
+  left:0;
+  bottom:0;
+  width:240px;
+  background:#132c4f;
+  overflow-y:auto;
+}
+
+.sidebar ul{ list-style:none; }
+
+.sidebar ul li{
+  padding:16px 20px;
+  color:white;
+  cursor:pointer;
+  transition:.3s;
+  font-size:14px;
+}
+
+.sidebar ul li:hover, .sidebar ul li.active{
+  background:#ffc107;
+  color:black;
+}
+
+.sidebar ul li i{ width:30px; }
+
+/* MAIN */
+.main{
+  margin-left:240px;
+  margin-top:65px;
+  padding:20px;
+  min-height: calc(100vh - 65px);
+}
+
+.page-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.page-title h2 { color: #0b1f3a; font-size: 18px; }
+
+.btn-add {
+  background: #0b1f3a;
+  color: #ffc107;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-add:hover { background: #132c4f; }
+
+/* TOP CARDS SUMMARY */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  background: white;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  border-left: 5px solid #0b1f3a;
+}
+
+.summary-card.due-card { border-left-color: #dc3545; }
+.summary-card.adv-card { border-left-color: #059669; }
+
+.summary-card p { font-size: 12px; color: #666; font-weight: 600; }
+.summary-card h3 { font-size: 22px; color: #0b1f3a; margin-top: 5px; }
+
+/* TABLE CARD */
+.card-table {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #f0f2f5;
+  font-size: 13px;
+  vertical-align: top;
+}
+
+th {
+  background: #f8fafc;
+  color: #0b1f3a;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.st-working { background: #dbeafe; color: #1e40af; }
+.st-completed { background: #dcfce7; color: #15803d; }
+.st-pending { background: #fef3c7; color: #b45309; }
+.st-cancel { background: #f3f4f6; color: #4b5563; }
+
+.pay-badge-due { background: #fee2e2; color: #991b1b; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
+.pay-badge-adv { background: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
+
+.img-preview {
+  width: 45px;
+  height: 45px;
+  border-radius: 6px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 1px solid #ddd;
+}
+
+/* MODAL */
+.modal-overlay{
+  display:none;
+  position:fixed;
+  top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.5);
+  z-index:1000;
+  justify-content:center;
+  align-items:center;
+  padding:15px;
+}
+
+.modal{
+  background:white;
+  width:100%;
+  max-width:600px;
+  border-radius:15px;
+  padding:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:2px solid #f2f5fa;
+  padding-bottom:12px;
+  margin-bottom:20px;
+}
+
+.modal-header h3{ color:#0b1f3a; font-size:18px; }
+.modal-close{ font-size:20px; cursor:pointer; color:#777; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group.full { grid-column: 1 / -1; }
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #444;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+  padding: 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  outline: none;
+  font-size: 13px;
+}
+
+.btn-submit {
+  width: 100%;
+  background: #0b1f3a;
+  color: #ffc107;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.action-btn {
+  background: #f1f5f9;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #0b1f3a;
+  margin-right: 4px;
+}
+
+.action-btn.delete { color: #dc3545; }
+
+/* MOBILE NAV */
+.bottomnav{ display:none; }
+
+@media(max-width:900px){
+  .sidebar{ display:none; }
+  .main{ margin-left:0; padding-bottom:90px; }
+  .search{ display:none; }
+  .header{ padding:0 10px; }
+  .bottomnav{
+    display:flex;
+    position:fixed;
+    bottom:0; left:0; right:0;
+    height:65px;
+    background:white;
+    justify-content:space-around;
+    align-items:center;
+    box-shadow:0 -2px 10px rgba(0,0,0,.1);
+    z-index:999;
+  }
+  .bottomnav i{ font-size:22px; color:#0b1f3a; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo" onclick="openPage('super_admin_dashboard.html')">CT Management</div>
+  
+  <!-- SEARCH BAR -->
+  <div class="search">
+    <input type="text" id="partySearch" placeholder="Search Party name, contact number, site address..." oninput="filterParties()">
+  </div>
+
+  <div class="icons">
+    <!-- NOTIFICATION BELL & DROPDOWN -->
+    <div class="notification-wrapper" onclick="toggleNotificationPanel(event)">
+      <i class="fa fa-bell" title="Notifications"></i>
+      <span class="notification-badge" id="notifBadge">0</span>
+
+      <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()">
+        <div class="notif-header">
+          <span><i class="fa fa-bell" style="color:#ffc107;"></i> System Alerts</span>
+          <span class="clear-btn" onclick="refreshNotifications()"><i class="fa fa-rotate"></i> Sync</span>
+        </div>
+        <div class="notif-list" id="notifList">
+          <!-- Live JS Notifications -->
+        </div>
+      </div>
+    </div>
+
+    <i class="fa fa-user-circle" onclick="logout()" title="Logout" style="cursor:pointer;"></i>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <ul>
+    <li onclick="openPage('super_admin_dashboard.html')"><i class="fa fa-house"></i> Dashboard</li>
+    <li onclick="openPage('employee_management.html')"><i class="fa fa-users"></i> Employee Management</li>
+    <li class="active" onclick="openPage('party_management.html')"><i class="fa fa-user-group"></i> Party Management</li>
+    <li onclick="openPage('receipt_management.html')"><i class="fa fa-wallet"></i> Receipt Management</li>
+    <li onclick="openPage('expense_management.html')"><i class="fa fa-money-bill-wave"></i> Expense Management</li>
+    <li onclick="openPage('employee_wallet.html')"><i class="fa fa-briefcase"></i> Employee Wallet</li>
+    <li onclick="openPage('dispatch_management.html')"><i class="fa fa-truck"></i> Dispatch Management</li>
+    <li onclick="openPage('stock_management.html')"><i class="fa fa-cubes"></i> Stock Management</li>
+    <li onclick="openPage('production_management.html')"><i class="fa fa-industry"></i> Production</li>
+    <li onclick="openPage('dchallan_management.html')"><i class="fa fa-file-lines"></i> D Challan</li>
+    <li onclick="openPage('reports.html')"><i class="fa fa-chart-column"></i> Reports</li>
+    <li onclick="openPage('settings.html')"><i class="fa fa-gear"></i> Settings</li>
+    <li onclick="logout()"><i class="fa fa-right-from-bracket"></i> Logout</li>
+  </ul>
+</div>
+
+<!-- MAIN AREA -->
+<div class="main">
+
+  <!-- TOP TOTAL CARDS -->
+  <div class="summary-cards">
+    <div class="summary-card due-card">
+      <p><i class="fa fa-circle-exclamation" style="color:#dc3545;"></i> TOTAL DUE AMOUNT</p>
+      <h3 id="totalDueVal">₹0</h3>
+    </div>
+    <div class="summary-card adv-card">
+      <p><i class="fa fa-circle-check" style="color:#059669;"></i> TOTAL ADVANCE RECEIVED</p>
+      <h3 id="totalAdvVal">₹0</h3>
+    </div>
+  </div>
+
+  <div class="page-title">
+    <h2><i class="fa fa-user-group" style="color:#ffc107;"></i> Party & Client Management</h2>
+    <button class="btn-add" id="addPartyBtn" onclick="openPartyModal()"><i class="fa fa-plus"></i> Add New Party</button>
+  </div>
+
+  <div class="card-table">
+    <table>
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Date</th>
+          <th>Order Img</th>
+          <th>Party Name</th>
+          <th>Contact</th>
+          <th>Site Address</th>
+          <th>Rate / Details</th>
+          <th>Site Status</th>
+          <th>Payment Balance</th>
+          <th id="actionHeader">Action</th>
+        </tr>
+      </thead>
+      <tbody id="partyTableBody">
+        <!-- JS Dynamic Rows -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADD / EDIT PARTY MODAL -->
+<div class="modal-overlay" id="partyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalHeading"><i class="fa fa-user-plus" style="color:#ffc107;"></i> Add New Party</h3>
+      <i class="fa fa-xmark modal-close" onclick="closePartyModal()"></i>
+    </div>
+
+    <form id="partyForm" onsubmit="saveParty(event)">
+      <input type="hidden" id="partyId">
+      
+      <div class="form-grid">
+        <!-- DATE SELECTION OPTION -->
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" id="partyDate" required>
+        </div>
+
+        <div class="form-group">
+          <label>Party Name *</label>
+          <input type="text" id="partyName" placeholder="e.g. Ramesh Kumar (Sipara)" required>
+        </div>
+
+        <div class="form-group">
+          <label>Contact Number *</label>
+          <input type="text" id="partyContact" placeholder="e.g. 9876543210" required>
+        </div>
+
+        <div class="form-group full">
+          <label>Site Address *</label>
+          <input type="text" id="siteAddress" placeholder="e.g. Plot No 42, Near Bypass, Patna" required>
+        </div>
+
+        <div class="form-group full">
+          <label>Rate Details (Custom Specification) *</label>
+          <textarea id="partyRateText" rows="2" placeholder="e.g. I-Shape Red @ ₹32/sqft, Zig Zag Yellow @ ₹34/sqft" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Site Status *</label>
+          <select id="siteStatus" required>
+            <option value="Under Working">Under Working</option>
+            <option value="Completed">Completed</option>
+            <option value="Pending">Pending</option>
+            <option value="Cancel">Cancel</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Payment Type *</label>
+          <select id="paymentType" required>
+            <option value="Due">Due Amount</option>
+            <option value="Advance">Advance Received</option>
+          </select>
+        </div>
+
+        <div class="form-group full">
+          <label>Amount (₹) *</label>
+          <input type="number" id="balanceAmount" placeholder="Enter amount e.g. 15000" min="0" required>
+        </div>
+
+        <div class="form-group full">
+          <label>Order Attachment / Image</label>
+          <input type="file" id="orderImgInput" accept="image/*" onchange="convertImgToBase64(event)">
+          <input type="hidden" id="orderImgBase64">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">Submit & Save Party</button>
+    </form>
+  </div>
+</div>
+
+<!-- BOTTOM MOBILE NAVIGATION -->
+<div class="bottomnav">
+  <i class="fa fa-house" onclick="openPage('super_admin_dashboard.html')"></i>
+  <i class="fa fa-users" onclick="openPage('employee_management.html')"></i>
+  <i class="fa fa-wallet" onclick="openPage('receipt_management.html')"></i>
+  <i class="fa fa-chart-column" onclick="openPage('reports.html')"></i>
+  <i class="fa fa-gear" onclick="openPage('settings.html')"></i>
+</div>
+
+<script>
+let partyList = [];
+let currentUserRole = "Super Admin";
+
+const statusPriority = {
+  "Under Working": 1,
+  "Pending": 2,
+  "Completed": 3,
+  "Cancel": 4
+};
+
+// HELPER: Format Date (YYYY-MM-DD to DD-MM-YYYY)
+function formatDateDisplay(dateStr) {
+  if (!dateStr) return "-";
+  const parts = dateStr.split("-");
+  if(parts.length === 3) {
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  }
+  return dateStr;
+}
+
+// INITIAL LOAD
+window.addEventListener('DOMContentLoaded', () => {
+  checkUserRole();
+  loadPartyData();
+});
+
+// JOB ROLE ENGINE LOGIC
+function checkUserRole() {
+  const activeUser = JSON.parse(localStorage.getItem('ct_active_user')) || { role: "Super Admin" };
+  currentUserRole = activeUser.role || "Super Admin";
+  
+  const addBtn = document.getElementById('addPartyBtn');
+  const actionHeader = document.getElementById('actionHeader');
+
+  // PERMISSION CHECK
+  if (currentUserRole !== "Super Admin" && currentUserRole !== "Admin") {
+    if (addBtn) addBtn.style.display = "none"; 
+    if (actionHeader) actionHeader.style.display = "none"; 
+  }
+}
+
+function loadPartyData() {
+  const stored = localStorage.getItem('ct_parties');
+  if (stored) {
+    try {
+      partyList = JSON.parse(stored);
+    } catch(e) {
+      partyList = getDefaultData();
+    }
+  } else {
+    partyList = getDefaultData();
+    saveToLocalStorage();
+  }
+  renderParties(partyList);
+  renderNotificationSystem();
+}
+
+function getDefaultData() {
+  const today = new Date().toISOString().split('T')[0];
+  return [
+    { id: 1, date: today, name: "Suresh Sharma", contact: "9835012345", address: "Sipara Bypass, Patna", rateText: "I-Shape Red @ ₹32/sqft", status: "Under Working", paymentType: "Due", amount: 15000, img: "" },
+    { id: 2, date: today, name: "Amit Kumar", contact: "9123456789", address: "Kankarbagh, Patna", rateText: "Zig-Zag 60mm Yellow @ ₹36/sqft", status: "Completed", paymentType: "Due", amount: 45000, img: "" },
+    { id: 3, date: today, name: "Vikas Singh", contact: "9934123456", address: "Nandlal Chhapra, Patna", rateText: "Hexagonal Grey @ ₹30/sqft", status: "Under Working", paymentType: "Advance", amount: 20000, img: "" },
+    { id: 4, date: today, name: "Ramesh Prasad", contact: "8877665544", address: "Anisabad, Patna", rateText: "3D Tile Block @ ₹40/sqft", status: "Pending", paymentType: "Due", amount: 0, img: "" }
+  ];
+}
+
+function saveToLocalStorage() {
+  localStorage.setItem('ct_parties', JSON.stringify(partyList));
+  renderNotificationSystem();
+}
+
+// RENDER TABLE
+function renderParties(list) {
+  list.sort((a, b) => (statusPriority[a.status] || 99) - (statusPriority[b.status] || 99));
+
+  const tbody = document.getElementById('partyTableBody');
+  tbody.innerHTML = "";
+
+  let totalDue = 0;
+  let totalAdv = 0;
+
+  const isAdmin = (currentUserRole === "Super Admin" || currentUserRole === "Admin");
+
+  if (list.length === 0) {
+    const colSpan = isAdmin ? 10 : 9;
+    tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; padding:25px; color:#888;">No matching party records found.</td></tr>`;
+    document.getElementById('totalDueVal').innerText = "₹0";
+    document.getElementById('totalAdvVal').innerText = "₹0";
+    return;
+  }
+
+  list.forEach((party, index) => {
+    if (party.paymentType === "Due") {
+      totalDue += Number(party.amount || 0);
+    } else if (party.paymentType === "Advance") {
+      totalAdv += Number(party.amount || 0);
+    }
+
+    let badgeStyle = "st-working";
+    if (party.status === "Completed") badgeStyle = "st-completed";
+    else if (party.status === "Pending") badgeStyle = "st-pending";
+    else if (party.status === "Cancel") badgeStyle = "st-cancel";
+
+    let payBadgeClass = party.paymentType === "Advance" ? "pay-badge-adv" : "pay-badge-due";
+
+    const imgTag = party.img 
+      ? `<img src="${party.img}" class="img-preview" onclick="window.open('${party.img}')" title="Click to view image">`
+      : `<span style="font-size:11px; color:#aaa;">No Img</span>`;
+
+    const actionTd = isAdmin ? `
+      <td>
+        <button class="action-btn" onclick="editParty(${party.id})" title="Edit"><i class="fa fa-pen-to-square"></i></button>
+        <button class="action-btn delete" onclick="deleteParty(${party.id})" title="Delete"><i class="fa fa-trash"></i></button>
+      </td>` : '';
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td><small style="font-weight:600; color:#444;">${formatDateDisplay(party.date)}</small></td>
+        <td>${imgTag}</td>
+        <td><strong>${party.name}</strong></td>
+        <td>${party.contact}</td>
+        <td>${party.address}</td>
+        <td><small style="color:#4b5563;">${party.rateText}</small></td>
+        <td><span class="status-badge ${badgeStyle}">${party.status}</span></td>
+        <td>
+          <span class="${payBadgeClass}">${party.paymentType}</span><br>
+          <strong>₹${Number(party.amount || 0).toLocaleString('en-IN')}</strong>
+        </td>
+        ${actionTd}
+      </tr>
+    `;
+  });
+
+  document.getElementById('totalDueVal').innerText = "₹" + totalDue.toLocaleString('en-IN');
+  document.getElementById('totalAdvVal').innerText = "₹" + totalAdv.toLocaleString('en-IN');
+}
+
+// LIVE SEARCH FILTER
+function filterParties() {
+  const query = document.getElementById('partySearch').value.toLowerCase().trim();
+  
+  if (query === "") {
+    renderParties(partyList);
+    return;
+  }
+
+  const filtered = partyList.filter(p => {
+    const nameMatch = (p.name || '').toLowerCase().includes(query);
+    const contactMatch = (p.contact || '').toString().includes(query);
+    const addressMatch = (p.address || '').toLowerCase().includes(query);
+    const dateMatch = (p.date || '').includes(query);
+    return nameMatch || contactMatch || addressMatch || dateMatch;
+  });
+
+  renderParties(filtered);
+}
+
+// IMAGE CONVERTER
+function convertImgToBase64(e) {
+  const file = e.target.files[0];
+  if(file) {
+    const reader = new FileReader();
+    reader.onloadend = function() {
+      document.getElementById('orderImgBase64').value = reader.result;
+    }
+    reader.readAsDataURL(file);
+  }
+}
+
+// MODAL & ACTION HANDLERS
+function openPartyModal() {
+  if (currentUserRole !== "Super Admin" && currentUserRole !== "Admin") {
+    alert("Access Denied! Only Admins can add parties.");
+    return;
+  }
+  document.getElementById('partyForm').reset();
+  document.getElementById('partyId').value = "";
+  document.getElementById('orderImgBase64').value = "";
+  
+  // Set current date as default
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('partyDate').value = today;
+
+  document.getElementById('modalHeading').innerHTML = '<i class="fa fa-user-plus" style="color:#ffc107;"></i> Add New Party';
+  document.getElementById('partyModal').style.display = 'flex';
+}
+
+function closePartyModal() {
+  document.getElementById('partyModal').style.display = 'none';
+}
+
+function editParty(id) {
+  const party = partyList.find(p => p.id == id);
+  if(!party) return;
+
+  document.getElementById('partyId').value = party.id;
+  document.getElementById('partyDate').value = party.date || new Date().toISOString().split('T')[0];
+  document.getElementById('partyName').value = party.name;
+  document.getElementById('partyContact').value = party.contact;
+  document.getElementById('siteAddress').value = party.address;
+  document.getElementById('partyRateText').value = party.rateText;
+  document.getElementById('siteStatus').value = party.status;
+  document.getElementById('paymentType').value = party.paymentType || "Due";
+  document.getElementById('balanceAmount').value = party.amount;
+  document.getElementById('orderImgBase64').value = party.img || "";
+
+  document.getElementById('modalHeading').innerHTML = '<i class="fa fa-pen-to-square" style="color:#ffc107;"></i> Edit Party Details';
+  document.getElementById('partyModal').style.display = 'flex';
+}
+
+function saveParty(e) {
+  e.preventDefault();
+
+  const id = document.getElementById('partyId').value;
+  const date = document.getElementById('partyDate').value;
+  const name = document.getElementById('partyName').value.trim();
+  const contact = document.getElementById('partyContact').value.trim();
+  const address = document.getElementById('siteAddress').value.trim();
+  const rateText = document.getElementById('partyRateText').value.trim();
+  const status = document.getElementById('siteStatus').value;
+  const paymentType = document.getElementById('paymentType').value;
+  const amount = Number(document.getElementById('balanceAmount').value);
+  const img = document.getElementById('orderImgBase64').value;
+
+  if (id) {
+    const index = partyList.findIndex(p => p.id == id);
+    if (index !== -1) {
+      partyList[index] = { id: Number(id), date, name, contact, address, rateText, status, paymentType, amount, img };
+    }
+  } else {
+    const newParty = {
+      id: Date.now(),
+      date, name, contact, address, rateText, status, paymentType, amount, img
+    };
+    partyList.unshift(newParty);
+  }
+
+  saveToLocalStorage();
+  loadPartyData();
+  closePartyModal();
+}
+
+function deleteParty(id) {
+  if(confirm("Kya aap sach me is party entry ko delete karna chahte hain?")) {
+    partyList = partyList.filter(p => p.id != id);
+    saveToLocalStorage();
+    loadPartyData();
+  }
+}
+
+// NOTIFICATION ENGINE
+function generateLiveNotifications() {
+  let alerts = [];
+
+  const pendingList = partyList.filter(p => p.status === "Pending");
+  if (pendingList.length > 0) {
+    alerts.push({
+      title: 'Pending Sites',
+      desc: `${pendingList.length} site(s) are currently pending.`,
+      type: 'warning'
+    });
+  }
+
+  const highDues = partyList.filter(p => p.paymentType === "Due" && Number(p.amount) >= 20000);
+  if (highDues.length > 0) {
+    alerts.push({
+      title: 'High Payment Due',
+      desc: `${highDues.length} party(ies) have due amounts >= ₹20,000.`,
+      type: 'alert'
+    });
+  }
+
+  return alerts;
+}
+
+function renderNotificationSystem() {
+  const badge = document.getElementById('notifBadge');
+  const notifList = document.getElementById('notifList');
+  if(!badge || !notifList) return;
+
+  const alerts = generateLiveNotifications();
+  badge.innerText = alerts.length;
+
+  if (alerts.length === 0) {
+    notifList.innerHTML = `<div class="notif-empty"><i class="fa fa-circle-check" style="font-size:20px; color:#059669; margin-bottom:5px;"></i><br>No new alerts!</div>`;
+    return;
+  }
+
+  notifList.innerHTML = "";
+  alerts.forEach(item => {
+    let iconColor = item.type === 'alert' ? '#dc3545' : '#ffc107';
+    notifList.innerHTML += `
+      <div class="notif-item">
+        <i class="fa fa-triangle-exclamation" style="color:${iconColor};"></i>
+        <div>
+          <div style="font-weight:600; color:#0b1f3a;">${item.title}</div>
+          <div style="font-size:11px; color:#555;">${item.desc}</div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function toggleNotificationPanel(e) {
+  e.stopPropagation();
+  document.getElementById('notifDropdown').classList.toggle('show');
+}
+
+function refreshNotifications() {
+  renderNotificationSystem();
+}
+
+window.addEventListener('click', () => {
+  const dropdown = document.getElementById('notifDropdown');
+  if (dropdown && dropdown.classList.contains('show')) {
+    dropdown.classList.remove('show');
+  }
+});
+
+function openPage(url) {
+  window.location.href = url;
+}
+
+function logout() {
+  if(confirm("Logout karna chahte hain?")) {
+    localStorage.removeItem('ct_active_user');
+    window.location.href = "login.html";
+  }
+}
+</script>
+</body>
+</html>

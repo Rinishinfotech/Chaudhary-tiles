@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Employee Management - CT Management</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Poppins,sans-serif;
+}
+
+body{
+  background:#f2f5fa;
+  color: #333;
+}
+
+/* HEADER */
+.header{
+  height:65px;
+  background:#0b1f3a;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  color:white;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:999;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  color:#ffc107;
+  cursor:pointer;
+}
+
+.search{
+  flex:1;
+  margin:0 20px;
+}
+
+.search input{
+  width:100%;
+  padding:11px;
+  border:none;
+  border-radius:8px;
+  outline:none;
+}
+
+.icons{
+  display:flex;
+  gap:18px;
+  align-items:center;
+  font-size:20px;
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: 35px;
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;
+  top:65px;
+  left:0;
+  bottom:0;
+  width:240px;
+  background:#132c4f;
+  overflow-y:auto;
+}
+
+.sidebar ul{
+  list-style:none;
+}
+
+.sidebar ul li{
+  padding:16px 20px;
+  color:white;
+  cursor:pointer;
+  transition:.3s;
+  font-size:15px;
+}
+
+.sidebar ul li:hover, .sidebar ul li.active{
+  background:#ffc107;
+  color:black;
+}
+
+.sidebar ul li i{
+  width:30px;
+}
+
+/* MAIN */
+.main{
+  margin-left:240px;
+  margin-top:65px;
+  padding:20px;
+  min-height: calc(100vh - 65px);
+}
+
+.page-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.page-title h2 {
+  color: #0b1f3a;
+  font-size: 18px;
+}
+
+.btn-add {
+  background: #0b1f3a;
+  color: #ffc107;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-add:hover {
+  background: #132c4f;
+}
+
+/* TABLE CARD */
+.card-table {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #f0f2f5;
+  font-size: 13px;
+}
+
+th {
+  background: #f8fafc;
+  color: #0b1f3a;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.role-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.role-super { background: #fee2e2; color: #991b1b; }
+.role-admin { background: #fef3c7; color: #92400e; }
+.role-manager { background: #dbeafe; color: #1e40af; }
+.role-planner { background: #e0e7ff; color: #3730a3; }
+.role-optivision { background: #dcfce7; color: #166534; }
+.role-viewer { background: #f3f4f6; color: #374151; }
+
+.action-btn {
+  background: #f1f5f9;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #0b1f3a;
+  font-size: 12px;
+  font-weight: 500;
+  transition: 0.2s;
+  margin-right: 4px;
+}
+
+.action-btn:hover {
+  background: #ffc107;
+  color: #000;
+}
+
+.action-btn.delete {
+  color: #dc3545;
+}
+
+.action-btn.delete:hover {
+  background: #dc3545;
+  color: white;
+}
+
+/* MODAL */
+.modal-overlay{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,0.5);
+  z-index:1000;
+  justify-content:center;
+  align-items:center;
+  padding:15px;
+}
+
+.modal{
+  background:white;
+  width:100%;
+  max-width:650px;
+  border-radius:15px;
+  padding:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:2px solid #f2f5fa;
+  padding-bottom:12px;
+  margin-bottom:20px;
+}
+
+.modal-header h3{
+  color:#0b1f3a;
+  font-size:18px;
+}
+
+.modal-close{
+  font-size:20px;
+  cursor:pointer;
+  color:#777;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #444;
+}
+
+.form-group input, .form-group select {
+  padding: 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  outline: none;
+  font-size: 13px;
+}
+
+.permissions-section {
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+}
+
+.permissions-section h4 {
+  font-size: 13px;
+  color: #0b1f3a;
+  margin-bottom: 10px;
+}
+
+.perm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.perm-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.btn-submit {
+  width: 100%;
+  background: #0b1f3a;
+  color: #ffc107;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* MOBILE NAV */
+.bottomnav{ display:none; }
+
+@media(max-width:900px){
+  .sidebar{ display:none; }
+  .main{ margin-left:0; padding-bottom:90px; }
+  .search{ display:none; }
+  .header{ padding:0 10px; }
+  .bottomnav{
+    display:flex;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    height:65px;
+    background:white;
+    justify-content:space-around;
+    align-items:center;
+    box-shadow:0 -2px 10px rgba(0,0,0,.1);
+    z-index:999;
+  }
+  .bottomnav i{ font-size:22px; color:#0b1f3a; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo" onclick="openPage('super_admin_dashboard.html')">CT Management</div>
+  <div class="search">
+    <input type="text" id="employeeSearch" placeholder="Search Employee by name or role..." onkeyup="filterEmployees()">
+  </div>
+  <div class="icons">
+    <i class="fa fa-bell" style="cursor:pointer;" title="Notifications"></i>
+    <span class="notification-badge" id="notifBadge">1</span>
+    <i class="fa fa-user-circle" onclick="logout()" title="Logout / Profile"></i>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <ul>
+    <li onclick="openPage('super_admin_dashboard.html')"><i class="fa fa-house"></i> Dashboard</li>
+    <li class="active" onclick="openPage('employee_management.html')"><i class="fa fa-users"></i> Employee Management</li>
+    <li onclick="openPage('party_management.html')"><i class="fa fa-user-group"></i> Party Management</li>
+    <li onclick="openPage('receipt_management.html')"><i class="fa fa-wallet"></i> Receipt Management</li>
+    <li onclick="openPage('expense_management.html')"><i class="fa fa-money-bill-wave"></i> Expense Management</li>
+    <li onclick="openPage('employee_wallet.html')"><i class="fa fa-briefcase"></i> Employee Wallet</li>
+    <li onclick="openPage('dispatch_management.html')"><i class="fa fa-truck"></i> Dispatch Management</li>
+    <li onclick="openPage('stock_management.html')"><i class="fa fa-cubes"></i> Stock Management</li>
+    <li onclick="openPage('production_management.html')"><i class="fa fa-industry"></i> Production</li>
+    <li onclick="openPage('dchallan_management.html')"><i class="fa fa-file-lines"></i> D Challan</li>
+    <li onclick="openPage('reports.html')"><i class="fa fa-chart-column"></i> Reports</li>
+    <li onclick="openPage('settings.html')"><i class="fa fa-gear"></i> Settings</li>
+    <li onclick="logout()"><i class="fa fa-right-from-bracket"></i> Logout</li>
+  </ul>
+</div>
+
+<!-- MAIN AREA -->
+<div class="main">
+
+  <div class="page-title">
+    <h2><i class="fa fa-users" style="color:#ffc107;"></i> Employee Roles & Daily Wallet Limits</h2>
+    <button class="btn-add" id="addEmpBtn" onclick="openEmpModal()"><i class="fa fa-plus"></i> Add New Employee</button>
+  </div>
+
+  <div class="card-table">
+    <table>
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Employee Name</th>
+          <th>Designated Role</th>
+          <th>Assigned Plant</th>
+          <th>Daily Wallet Limit</th>
+          <th>Today's Balance</th>
+          <th>Access Rights</th>
+          <th id="actionHeader">Action</th>
+        </tr>
+      </thead>
+      <tbody id="employeeTableBody">
+        <!-- JS Dynamic Table Rows -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADD/EDIT EMPLOYEE MODAL -->
+<div class="modal-overlay" id="empModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalHeading"><i class="fa fa-user-gear" style="color:#ffc107;"></i> Employee Permissions & Limits</h3>
+      <i class="fa fa-xmark modal-close" onclick="closeEmpModal()"></i>
+    </div>
+
+    <form id="empForm" onsubmit="saveEmployee(event)">
+      <input type="hidden" id="empId">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Employee Name *</label>
+          <input type="text" id="empName" placeholder="Full Name" required>
+        </div>
+
+        <div class="form-group">
+          <label>User Login ID / Phone *</label>
+          <input type="text" id="empUsername" placeholder="Username e.g. monu98" required>
+        </div>
+
+        <div class="form-group">
+          <label>Login Password *</label>
+          <input type="password" id="empPassword" placeholder="Enter password" required>
+        </div>
+
+        <div class="form-group">
+          <label>Role Privilege *</label>
+          <select id="empRole" onchange="autoSelectRolePermissions()" required>
+            <option value="Super Admin">Super Admin</option>
+            <option value="Admin">Admin</option>
+            <option value="Manager">Manager</option>
+            <option value="Planner">Planner</option>
+            <option value="Optivision">Optivision (Plant)</option>
+            <option value="Viewer">Viewer</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Assigned Plant Location *</label>
+          <select id="empPlant" required>
+            <option value="Both Plants">Both Plants (Sipara & Nandlal Chhapra)</option>
+            <option value="Sipara">Sipara Plant</option>
+            <option value="Nandlal Chhapra">Nandlal Chhapra Plant</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Daily Wallet Limit (₹/Day) *</label>
+          <input type="number" id="empWalletLimit" placeholder="500" value="500" min="0" required>
+        </div>
+      </div>
+
+      <div class="permissions-section">
+        <h4>Granular Module Access Checklist</h4>
+        <div class="perm-grid">
+          <label class="perm-item"><input type="checkbox" id="perm_dispatch" checked> Dispatch</label>
+          <label class="perm-item"><input type="checkbox" id="perm_production" checked> Production</label>
+          <label class="perm-item"><input type="checkbox" id="perm_stock" checked> Stock View</label>
+          <label class="perm-item"><input type="checkbox" id="perm_dchallan" checked> D-Challan</label>
+          <label class="perm-item"><input type="checkbox" id="perm_receipt" checked> Receipt</label>
+          <label class="perm-item"><input type="checkbox" id="perm_expense" checked> Expense</label>
+          <label class="perm-item"><input type="checkbox" id="perm_party" checked> Party View</label>
+          <label class="perm-item"><input type="checkbox" id="perm_reports" checked> Reports</label>
+          <label class="perm-item"><input type="checkbox" id="perm_edit" checked> Master Edit</label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">Save Employee Profile</button>
+    </form>
+  </div>
+</div>
+
+<!-- BOTTOM MOBILE NAVIGATION -->
+<div class="bottomnav">
+  <i class="fa fa-house" onclick="openPage('super_admin_dashboard.html')"></i>
+  <i class="fa fa-users" style="color: #ffc107;" onclick="openPage('employee_management.html')"></i>
+  <i class="fa fa-wallet" onclick="openPage('receipt_management.html')"></i>
+  <i class="fa fa-chart-column" onclick="openPage('reports.html')"></i>
+  <i class="fa fa-gear" onclick="openPage('settings.html')"></i>
+</div>
+
+<script>
+let activeUser = null;
+let teamList = [];
+
+function checkUserSession() {
+  const session = localStorage.getItem('ct_active_user');
+  if(!session) {
+    window.location.href = "login.html";
+    return;
+  }
+  activeUser = JSON.parse(session);
+  
+  // Job Role permissions for adding/editing employees
+  const addBtn = document.getElementById('addEmpBtn');
+  const actionHeader = document.getElementById('actionHeader');
+
+  if(activeUser.role !== "Super Admin" && activeUser.role !== "Admin") {
+    if(addBtn) addBtn.style.display = "none";
+    if(actionHeader) actionHeader.style.display = "none";
+  }
+
+  loadTeamData();
+}
+
+// DAILY WALLET AUTO REFILL ENGINE
+function checkAndRefillDailyWalletLimits() {
+  const today = new Date().toISOString().split('T')[0];
+  const lastRefillDate = localStorage.getItem('ct_last_wallet_refill_date');
+
+  if (lastRefillDate !== today) {
+    teamList.forEach(emp => {
+      // Har din balance reset karke wapas daily limit ke barabar kar diya jayega
+      emp.currentWalletBalance = Number(emp.walletLimit || 0);
+    });
+    localStorage.setItem('ct_team', JSON.stringify(teamList));
+    localStorage.setItem('ct_last_wallet_refill_date', today);
+  }
+}
+
+function loadTeamData() {
+  const stored = localStorage.getItem('ct_team');
+  if(stored) {
+    try {
+      teamList = JSON.parse(stored);
+    } catch(e) {
+      teamList = getDefaultTeam();
+    }
+  } else {
+    teamList = getDefaultTeam();
+    localStorage.setItem('ct_team', JSON.stringify(teamList));
+  }
+
+  // Check Daily Refill logic
+  checkAndRefillDailyWalletLimits();
+  renderTable(teamList);
+}
+
+function getDefaultTeam() {
+  return [
+    { id: 1, name: "Mr Manoj Kumar Chaudhary", username: "manoj", role: "Super Admin", plant: "Both Plants", walletLimit: 0, currentWalletBalance: 0, permissions: { dispatch: true, production: true, stock: true, dchallan: true, receipt: true, expense: true, party: true, reports: true, edit: true } },
+    { id: 2, name: "Monu Kumar", username: "monu", role: "Admin", plant: "Both Plants", walletLimit: 1500, currentWalletBalance: 1500, permissions: { dispatch: true, production: true, stock: true, dchallan: true, receipt: true, expense: true, party: true, reports: true, edit: true } },
+    { id: 3, name: "Brajesh Kumar", username: "brajesh", role: "Manager", plant: "Both Plants", walletLimit: 500, currentWalletBalance: 500, permissions: { dispatch: true, production: true, stock: true, dchallan: true, receipt: true, expense: true, party: true, reports: true, edit: false } },
+    { id: 4, name: "Jayendra Kumar", username: "jayendra", role: "Planner", plant: "Both Plants", walletLimit: 500, currentWalletBalance: 500, permissions: { dispatch: true, production: true, stock: true, dchallan: true, receipt: false, expense: false, party: true, reports: true, edit: false } },
+    { id: 5, name: "Jitendra Kumar", username: "jitendra", role: "Optivision", plant: "Sipara", walletLimit: 500, currentWalletBalance: 500, permissions: { dispatch: true, production: true, stock: true, dchallan: true, receipt: false, expense: false, party: false, reports: false, edit: false } },
+    { id: 6, name: "Mr Mani Bhushan Chaudhary", username: "manibhushan", role: "Viewer", plant: "Both Plants", walletLimit: 0, currentWalletBalance: 0, permissions: { dispatch: false, production: false, stock: true, dchallan: false, receipt: false, expense: false, party: true, reports: true, edit: false } }
+  ];
+}
+
+function renderTable(list) {
+  const tbody = document.getElementById('employeeTableBody');
+  tbody.innerHTML = "";
+
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+
+  list.forEach((emp, index) => {
+    let badgeClass = "role-viewer";
+    if(emp.role === "Super Admin") badgeClass = "role-super";
+    else if(emp.role === "Admin") badgeClass = "role-admin";
+    else if(emp.role === "Manager") badgeClass = "role-manager";
+    else if(emp.role === "Planner") badgeClass = "role-planner";
+    else if(emp.role === "Optivision") badgeClass = "role-optivision";
+
+    // Limit Privacy rule for Super Admin
+    let displayLimit = "₹" + Number(emp.walletLimit || 0).toLocaleString('en-IN') + "/Day";
+    let displayBal = "₹" + Number(emp.currentWalletBalance !== undefined ? emp.currentWalletBalance : emp.walletLimit || 0).toLocaleString('en-IN');
+
+    if(emp.role === "Super Admin" && !isAdmin) {
+      displayLimit = "••••••";
+      displayBal = "••••••";
+    }
+
+    const actionTd = isAdmin ? `
+      <td>
+        <button class="action-btn" onclick="editEmp(${emp.id})" title="Edit Role & Permissions">
+          <i class="fa fa-pen-to-square"></i> Edit
+        </button>
+        <button class="action-btn delete" onclick="deleteEmp(${emp.id})" title="Remove Employee">
+          <i class="fa fa-trash"></i>
+        </button>
+      </td>` : '';
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td><strong>${emp.name}</strong><br><small style="color:#666;">@${emp.username || 'user'}</small></td>
+        <td><span class="role-badge ${badgeClass}">${emp.role}</span></td>
+        <td>${emp.plant}</td>
+        <td><strong>${displayLimit}</strong></td>
+        <td><span style="color:#059669; font-weight:600;">${displayBal}</span></td>
+        <td><small style="color:#059669;">Custom Access Active</small></td>
+        ${actionTd}
+      </tr>
+    `;
+  });
+}
+
+function filterEmployees() {
+  const q = document.getElementById('employeeSearch').value.toLowerCase();
+  const filtered = teamList.filter(e => e.name.toLowerCase().includes(q) || e.role.toLowerCase().includes(q) || (e.username && e.username.toLowerCase().includes(q)));
+  renderTable(filtered);
+}
+
+function openEmpModal() {
+  if (activeUser.role !== "Super Admin" && activeUser.role !== "Admin") {
+    alert("Access Denied! Only Admins can manage employees.");
+    return;
+  }
+  document.getElementById('empForm').reset();
+  document.getElementById('empId').value = "";
+  document.getElementById('empWalletLimit').value = 500;
+  document.getElementById('empRole').value = "Manager";
+  autoSelectRolePermissions();
+  
+  document.getElementById('modalHeading').innerHTML = '<i class="fa fa-user-plus" style="color:#ffc107;"></i> Add New Employee';
+  document.getElementById('empModal').style.display = 'flex';
+}
+
+function autoSelectRolePermissions() {
+  const role = document.getElementById('empRole').value;
+  const isSuperOrAdmin = (role === "Super Admin" || role === "Admin");
+  const isManager = (role === "Manager");
+  const isPlanner = (role === "Planner");
+  const isOptivision = (role === "Optivision");
+
+  document.getElementById('perm_dispatch').checked = isSuperOrAdmin || isManager || isPlanner || isOptivision;
+  document.getElementById('perm_production').checked = isSuperOrAdmin || isManager || isPlanner || isOptivision;
+  document.getElementById('perm_stock').checked = true;
+  document.getElementById('perm_dchallan').checked = isSuperOrAdmin || isManager || isPlanner || isOptivision;
+  document.getElementById('perm_receipt').checked = isSuperOrAdmin || isManager;
+  document.getElementById('perm_expense').checked = isSuperOrAdmin || isManager;
+  document.getElementById('perm_party').checked = isSuperOrAdmin || isManager || isPlanner;
+  document.getElementById('perm_reports').checked = isSuperOrAdmin || isManager || isPlanner;
+  document.getElementById('perm_edit').checked = isSuperOrAdmin;
+}
+
+function editEmp(id) {
+  const emp = teamList.find(e => e.id == id);
+  if(!emp) return;
+
+  document.getElementById('empId').value = emp.id;
+  document.getElementById('empName').value = emp.name;
+  document.getElementById('empUsername').value = emp.username || "";
+  document.getElementById('empPassword').value = emp.password || "123456";
+  document.getElementById('empRole').value = emp.role;
+  document.getElementById('empPlant').value = emp.plant;
+  document.getElementById('empWalletLimit').value = emp.walletLimit || 0;
+
+  // Restore Checkboxes
+  const p = emp.permissions || {};
+  document.getElementById('perm_dispatch').checked = !!p.dispatch;
+  document.getElementById('perm_production').checked = !!p.production;
+  document.getElementById('perm_stock').checked = !!p.stock;
+  document.getElementById('perm_dchallan').checked = !!p.dchallan;
+  document.getElementById('perm_receipt').checked = !!p.receipt;
+  document.getElementById('perm_expense').checked = !!p.expense;
+  document.getElementById('perm_party').checked = !!p.party;
+  document.getElementById('perm_reports').checked = !!p.reports;
+  document.getElementById('perm_edit').checked = !!p.edit;
+
+  document.getElementById('modalHeading').innerHTML = '<i class="fa fa-user-gear" style="color:#ffc107;"></i> Edit Employee Profile';
+  document.getElementById('empModal').style.display = 'flex';
+}
+
+function closeEmpModal() {
+  document.getElementById('empModal').style.display = 'none';
+}
+
+function saveEmployee(e) {
+  e.preventDefault();
+  const id = document.getElementById('empId').value;
+  const name = document.getElementById('empName').value.trim();
+  const username = document.getElementById('empUsername').value.trim();
+  const password = document.getElementById('empPassword').value;
+  const role = document.getElementById('empRole').value;
+  const plant = document.getElementById('empPlant').value;
+  const walletLimit = parseFloat(document.getElementById('empWalletLimit').value || 0);
+
+  const permissions = {
+    dispatch: document.getElementById('perm_dispatch').checked,
+    production: document.getElementById('perm_production').checked,
+    stock: document.getElementById('perm_stock').checked,
+    dchallan: document.getElementById('perm_dchallan').checked,
+    receipt: document.getElementById('perm_receipt').checked,
+    expense: document.getElementById('perm_expense').checked,
+    party: document.getElementById('perm_party').checked,
+    reports: document.getElementById('perm_reports').checked,
+    edit: document.getElementById('perm_edit').checked,
+  };
+
+  if(id) {
+    // Update
+    const idx = teamList.findIndex(e => e.id == id);
+    if(idx !== -1) {
+      teamList[idx].name = name;
+      teamList[idx].username = username;
+      teamList[idx].password = password;
+      teamList[idx].role = role;
+      teamList[idx].plant = plant;
+      
+      // Agar wallet limit badli hai, to current balance update karein
+      if(teamList[idx].walletLimit !== walletLimit) {
+        teamList[idx].walletLimit = walletLimit;
+        teamList[idx].currentWalletBalance = walletLimit;
+      }
+      teamList[idx].permissions = permissions;
+    }
+  } else {
+    // Create
+    const newEmp = {
+      id: Date.now(),
+      name,
+      username,
+      password,
+      role,
+      plant,
+      walletLimit,
+      currentWalletBalance: walletLimit, // Initial full balance
+      permissions
+    };
+    teamList.push(newEmp);
+  }
+
+  localStorage.setItem('ct_team', JSON.stringify(teamList));
+  renderTable(teamList);
+  closeEmpModal();
+  alert("Employee Job Role & Daily Wallet Limit saved successfully!");
+}
+
+function deleteEmp(id) {
+  if (confirm("Kya aap sach me is employee ko system se hatana chahte hain?")) {
+    teamList = teamList.filter(e => e.id != id);
+    localStorage.setItem('ct_team', JSON.stringify(teamList));
+    renderTable(teamList);
+  }
+}
+
+function openPage(page){ window.location.href = page; }
+function logout(){
+  if(confirm("Logout from CT Management Portal?")){
+    localStorage.removeItem('ct_active_user');
+    window.location.href = "login.html";
+  }
+}
+
+window.onload = checkUserSession;
+</script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Chaudhary Tiles Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #0b1f3a 0%, #132c4f 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .login-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 420px;
+      border-radius: 18px;
+      padding: 30px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+    .brand-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    .brand-header h1 {
+      color: #0b1f3a;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .brand-header p {
+      color: #777;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+    .form-group {
+      margin-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+    }
+    .input-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-box i {
+      position: absolute;
+      left: 14px;
+      color: #0b1f3a;
+      font-size: 16px;
+    }
+    .input-box input, .input-box select {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      border: 1px solid #dcdfe6;
+      border-radius: 10px;
+      outline: none;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+    .input-box input:focus, .input-box select:focus {
+      border-color: #0b1f3a;
+      box-shadow: 0 0 0 3px rgba(11, 31, 58, 0.1);
+    }
+    .btn-login {
+      width: 100%;
+      background: #0b1f3a;
+      color: #ffc107;
+      border: none;
+      padding: 13px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-login:hover {
+      background: #132c4f;
+    }
+    .quick-users {
+      margin-top: 25px;
+      border-top: 1px solid #eee;
+      padding-top: 15px;
+    }
+    .quick-users h4 {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .user-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chip {
+      background: #f2f5fa;
+      border: 1px solid #d1d9e6;
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      color: #0b1f3a;
+      transition: 0.2s;
+    }
+    .chip:hover {
+      background: #ffc107;
+      color: #000;
+      border-color: #ffc107;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <div class="brand-header">
+      <h1>Chaudhary Tiles</h1>
+      <p>Factory ERP & Team Operations Portal</p>
+    </div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>Select Team Member Profile</label>
+        <div class="input-box">
+          <i class="fa fa-user"></i>
+          <select id="userSelect" onchange="autoFillRole()" required>
+            <option value="">-- Choose Profile --</option>
+            <option value="1">Mr Manoj Kumar Chaudhary (Super Admin)</option>
+            <option value="2">Monu Kumar (Admin)</option>
+            <option value="3">Brajesh Kumar (Manager)</option>
+            <option value="4">Jayendra Kumar (Planner)</option>
+            <option value="5">Jitendra Kumar (Optivision - Plant)</option>
+            <option value="6">Mr Mani Bhushan Chaudhary (Viewer)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Role Privilege Tag</label>
+        <div class="input-box">
+          <i class="fa fa-shield-halved"></i>
+          <input type="text" id="userRoleDisplay" placeholder="Select profile first" readonly style="background: #f8fafc;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Security PIN / Password</label>
+        <div class="input-box">
+          <i class="fa fa-key"></i>
+          <input type="password" id="userPin" placeholder="Enter PIN (Default: 1234)" value="1234" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-login">
+        <span>Login To Portal</span>
+        <i class="fa fa-arrow-right"></i>
+      </button>
+    </form>
+
+    <div class="quick-users">
+      <h4>Quick Select Profile (Demo Access):</h4>
+      <div class="user-chips">
+        <span class="chip" onclick="quickSelect(1)">Super Admin</span>
+        <span class="chip" onclick="quickSelect(2)">Admin (Monu)</span>
+        <span class="chip" onclick="quickSelect(3)">Manager (Brajesh)</span>
+        <span class="chip" onclick="quickSelect(4)">Planner (Jayendra)</span>
+        <span class="chip" onclick="quickSelect(5)">Optivision (Jitendra)</span>
+        <span class="chip" onclick="quickSelect(6)">Viewer (Mani Bhushan)</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // System Users Master Registry
+    const defaultTeam = [
+      { id: 1, name: "Mr Manoj Kumar Chaudhary", role: "Super Admin", plant: "Both Plants", wallet: 0 },
+      { id: 2, name: "Monu Kumar", role: "Admin", plant: "Both Plants", wallet: 1500 },
+      { id: 3, name: "Brajesh Kumar", role: "Manager", plant: "Both Plants", wallet: 500 },
+      { id: 4, name: "Jayendra Kumar", role: "Planner", plant: "Both Plants", wallet: 500 },
+      { id: 5, name: "Jitendra Kumar", role: "Optivision", plant: "Sipara & Nandlal Chhapra", wallet: 500 },
+      { id: 6, name: "Mr Mani Bhushan Chaudhary", role: "Viewer", plant: "Both Plants", wallet: 0 }
+    ];
+
+    // Initialize System LocalStorage State
+    function initSystemState() {
+      if (!localStorage.getItem('ct_team')) {
+        localStorage.setItem('ct_team', JSON.stringify(defaultTeam));
+      }
+      if (!localStorage.getItem('ct_notifications')) {
+        const initialNotifications = [
+          { id: 1, title: "System Ready", msg: "Chaudhary Tiles ERP Portal Active", time: "Just Now", type: "system" }
+        ];
+        localStorage.setItem('ct_notifications', JSON.stringify(initialNotifications));
+      }
+    }
+
+    function autoFillRole() {
+      const val = document.getElementById('userSelect').value;
+      if (!val) {
+        document.getElementById('userRoleDisplay').value = "";
+        return;
+      }
+      const user = defaultTeam.find(u => u.id == val);
+      if (user) {
+        document.getElementById('userRoleDisplay').value = user.role;
+      }
+    }
+
+    function quickSelect(id) {
+      document.getElementById('userSelect').value = id;
+      autoFillRole();
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const userId = document.getElementById('userSelect').value;
+      const user = defaultTeam.find(u => u.id == userId);
+
+      if (!user) {
+        alert("Kripya profile select karein!");
+        return;
+      }
+
+      // Save Active User Session
+      localStorage.setItem('ct_active_user', JSON.stringify(user));
+      
+      // Redirect to Main Dashboard
+      window.location.href = "super_admin_dashboard.html";
+    }
+
+    window.onload = initSystemState;
+  </script>
+</body>
+</html>
