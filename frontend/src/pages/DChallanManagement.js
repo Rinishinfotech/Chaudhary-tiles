@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
-import { api, fmtDate, todayStr } from '../api';
+import { api, fmtDate, todayStr, inr, printDocument } from '../api';
 
 const COLORS = ['Red', 'Yellow', 'Grey', 'Black', 'White', 'General/NA'];
 
@@ -15,9 +15,33 @@ export default function DChallanManagement() {
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState(null);
   const [imgView, setImgView] = useState(null);
+  const [firm, setFirm] = useState({});
 
-  const load = async () => { setChallans(await api.getChallans()); setStock(await api.getStock()); setParties(await api.getParties()); };
+  const load = async () => { setChallans(await api.getChallans()); setStock(await api.getStock()); setParties(await api.getParties()); setFirm(await api.getFirm()); };
   useEffect(() => { load(); }, []);
+
+  const printChallan = (ch) => {
+    const rows = (ch.items || []).map((it) => `<tr><td>${it.itemName}</td><td>${it.color}</td><td>${it.qty.toLocaleString()} Pcs</td></tr>`).join('');
+    const total = (ch.items || []).reduce((s, it) => s + (it.qty || 0), 0);
+    const body = `
+      <div class="doc-head">
+        <div><div class="firm-name">${firm.name || 'Chaudhary Tiles'}</div>
+        <div class="firm-sub">${firm.address || ''}<br/>Phone: ${firm.phone || ''} ${firm.gst ? '| GSTIN: ' + firm.gst : ''}</div></div>
+        <div class="doc-title">DELIVERY CHALLAN</div>
+      </div>
+      <div class="meta">
+        <div><span>Challan No</span>${ch.dcNumber}</div>
+        <div><span>Date</span>${fmtDate(ch.date)}</div>
+        <div><span>Party Name</span>${ch.party}</div>
+        <div><span>Dispatch Plant</span>${ch.plant}</div>
+        <div><span>Site Address</span>${ch.siteAddr || 'N/A'} (Mob: ${ch.siteMobile || 'N/A'})</div>
+        <div><span>Vehicle / Driver</span>${ch.vehicle} - ${ch.driverName} (${ch.driverMobile || 'N/A'})</div>
+      </div>
+      <table><thead><tr><th>Item / Pattern</th><th>Color</th><th>Dispatched Qty</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="total-row">Total Dispatched: ${total.toLocaleString()} Pcs</div>
+      <div class="foot"><div>Received above goods in good condition.</div><div class="sign">Authorised Signatory</div></div>`;
+    printDocument('Challan ' + ch.dcNumber, body);
+  };
 
   const plantItems = (plant) => stock.filter((s) => s.plant === plant);
   const openAdd = () => { const plant = 'Sipara Plant'; const first = plantItems(plant)[0]; setForm({ date: todayStr(), dcNumber: 'DC-' + Math.floor(1000 + Math.random() * 9000), plant, party: '', siteAddr: '', siteMobile: '', vehicle: '', driverName: '', driverMobile: '', photo: '', items: [{ itemId: first?.id || '', color: 'Red', qty: '' }] }); setModal(true); };
@@ -94,7 +118,7 @@ export default function DChallanManagement() {
           <div className="challan-card" key={ch.id}>
             <div className="card-header">
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}><span className="dc-no-badge"><i className="fa fa-file-invoice"></i> {ch.dcNumber}</span><span className="dc-date-badge"><i className="fa fa-calendar-day"></i> {fmtDate(ch.date)}</span><span style={{ fontSize: 12, fontWeight: 700, color: '#0b1f3a' }}>{ch.plant}</span></div>
-              {isAdmin && <div style={{ display: 'flex', gap: 12 }}><i className="fa fa-pen-to-square" style={{ color: '#2563eb', cursor: 'pointer' }} onClick={() => openEdit(ch)}></i><i className="fa fa-trash" style={{ color: '#ef4444', cursor: 'pointer' }} onClick={() => del(ch.id)}></i></div>}
+              {isAdmin ? <div style={{ display: 'flex', gap: 12 }}><i className="fa fa-print" style={{ color: '#0b1f3a', cursor: 'pointer' }} title="Print / PDF" onClick={() => printChallan(ch)}></i><i className="fa fa-pen-to-square" style={{ color: '#2563eb', cursor: 'pointer' }} onClick={() => openEdit(ch)}></i><i className="fa fa-trash" style={{ color: '#ef4444', cursor: 'pointer' }} onClick={() => del(ch.id)}></i></div> : <i className="fa fa-print" style={{ color: '#0b1f3a', cursor: 'pointer' }} title="Print / PDF" onClick={() => printChallan(ch)}></i>}
             </div>
             <div className="info-grid">
               <div className="info-item"><span>PARTY NAME:</span><strong>{ch.party}</strong></div>

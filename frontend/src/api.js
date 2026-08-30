@@ -76,3 +76,28 @@ export const fmtDate = (s) => {
   return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : s;
 };
 export const todayStr = () => new Date().toISOString().split('T')[0];
+
+export function printDocument(title, bodyHtml) {
+  const w = window.open('', '_blank', 'width=800,height=900');
+  if (!w) { alert('Please allow pop-ups to download/print the document.'); return; }
+  w.document.write(`<!doctype html><html><head><title>${title}</title>
+  <style>
+    * { font-family: 'Poppins', Arial, sans-serif; box-sizing: border-box; }
+    body { margin: 0; padding: 30px; color: #1e293b; }
+    .doc-head { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:3px solid #0b1f3a; padding-bottom:16px; margin-bottom:20px; }
+    .firm-name { font-size:24px; font-weight:700; color:#0b1f3a; }
+    .firm-sub { font-size:12px; color:#555; margin-top:4px; }
+    .doc-title { background:#0b1f3a; color:#ffc107; padding:6px 14px; border-radius:8px; font-weight:700; font-size:14px; }
+    .meta { display:grid; grid-template-columns:1fr 1fr; gap:8px 24px; margin-bottom:20px; font-size:13px; }
+    .meta div span { color:#64748b; font-weight:600; display:block; font-size:11px; text-transform:uppercase; }
+    table { width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
+    th,td { border:1px solid #cbd5e1; padding:8px 10px; text-align:left; }
+    th { background:#f1f5f9; color:#0b1f3a; }
+    .total-row { font-weight:700; font-size:16px; color:#0b1f3a; margin-top:16px; text-align:right; }
+    .foot { margin-top:40px; display:flex; justify-content:space-between; font-size:12px; color:#555; }
+    .sign { border-top:1px solid #94a3b8; padding-top:6px; width:180px; text-align:center; }
+  </style></head><body>${bodyHtml}
+  <script>window.onload=function(){window.print();}</script>
+  </body></html>`);
+  w.document.close();
+}

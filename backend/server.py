@@ -645,9 +645,23 @@ async def wallet_summary():
 # ---------------- NOTIFICATIONS ----------------
 @api.get("/notifications")
 async def get_notifications():
+    # Live low-stock alerts computed from current stock
+    alerts = []
+    stock = await db.stock.find().to_list(1000)
+    for s in stock:
+        total = sum((s.get("colors") or {}).values())
+        if total <= (s.get("minLimit") or 0):
+            alerts.append({
+                "id": "low-" + s["id"],
+                "title": "Low Stock Alert",
+                "msg": f"{s.get('name')} ({s.get('plant')}) is low: {int(total):,} {s.get('unit','')} left (limit {int(s.get('minLimit') or 0):,})",
+                "time": "Live",
+                "type": "low_stock",
+            })
     docs = await db.notifications.find().to_list(500)
     docs.reverse()
-    return [await clean(d) for d in docs]
+    stored = [await clean(d) for d in docs]
+    return alerts + stored
 
 
 # ---------------- APPROVALS ----------------

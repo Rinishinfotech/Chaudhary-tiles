@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
-import { api, inr, todayStr } from '../api';
+import { api, inr, todayStr, printDocument } from '../api';
 
 const modeClass = (m) => m === 'Cash' ? 'mode-cash' : (m || '').includes('Cheque') ? 'mode-cheque' : 'mode-upi';
 const CONTRACTORS = ['Sipara Contractor Ledger', 'Nandlal Chhapra Contractor Ledger', 'Cement / Raw Material Supplier', 'Transport / Freight Contractor'];
@@ -21,12 +21,37 @@ export default function ReceiptManagement() {
   const [form, setForm] = useState(null);
   const [partySearch, setPartySearch] = useState('');
 
+  const [firm, setFirm] = useState({});
+
   const load = async () => {
     setReceipts(await api.getReceipts());
     setParties(await api.getParties());
     setTeam(await api.getTeam());
+    setFirm(await api.getFirm());
   };
   useEffect(() => { load(); }, []);
+
+  const printReceipt = (r) => {
+    const body = `
+      <div class="doc-head">
+        <div><div class="firm-name">${firm.name || 'Chaudhary Tiles'}</div>
+        <div class="firm-sub">${firm.address || ''}<br/>Phone: ${firm.phone || ''} ${firm.gst ? '| GSTIN: ' + firm.gst : ''}</div></div>
+        <div class="doc-title">RECEIPT VOUCHER</div>
+      </div>
+      <div class="meta">
+        <div><span>Voucher No</span>${r.srNo}</div>
+        <div><span>Date</span>${r.date}</div>
+        <div><span>Received From (Party)</span>${r.party}</div>
+        <div><span>Payment Mode</span>${r.mode}</div>
+        <div><span>Routed To</span>${r.receiver}</div>
+        <div><span>Category</span>${r.receiverType}</div>
+      </div>
+      <table><thead><tr><th>Description</th><th>Amount</th></tr></thead>
+      <tbody><tr><td>Payment received from ${r.party}${r.remarks ? ' — ' + r.remarks : ''}</td><td>${inr(r.amount)}</td></tr></tbody></table>
+      <div class="total-row">Total Received: ${inr(r.amount)}</div>
+      <div class="foot"><div>Thank you for your business.</div><div class="sign">Authorised Signatory</div></div>`;
+    printDocument('Receipt ' + r.srNo, body);
+  };
 
   const receiverOptions = (type) => type === 'Employee' ? team.map((t) => `${t.name}`)
     : type === 'Supplier / Creditor / Contractor' ? CONTRACTORS : EXPENSE_HEADS;
@@ -99,6 +124,7 @@ export default function ReceiptManagement() {
                 <td><span className={`mode-badge ${modeClass(r.mode)}`}>{r.mode}</span></td>
                 <td>{r.receiver}</td><td><small className="cat-badge">{r.receiverType}</small></td><td>{r.remarks || '-'}</td>
                 {isAdmin && <td>
+                  <button className="action-btn" onClick={() => printReceipt(r)} title="Print / PDF"><i className="fa fa-print"></i></button>
                   <button className="action-btn" onClick={() => openEdit(r)}><i className="fa fa-pen-to-square"></i></button>
                   <button className="action-btn delete" onClick={() => del(r.id)}><i className="fa fa-trash"></i></button>
                 </td>}

@@ -36,6 +36,12 @@ export default function Layout({ children, searchPlaceholder = 'Search...', onSe
     }
   };
 
+  const openNotif = () => {
+    const next = !showNotif;
+    setShowNotif(next);
+    if (next) api.getNotifications().then(setNotifs).catch(() => {});
+  };
+
   return (
     <div>
       <div className="ct-header">
@@ -44,7 +50,7 @@ export default function Layout({ children, searchPlaceholder = 'Search...', onSe
           <input type="text" placeholder={searchPlaceholder} onChange={(e) => onSearch && onSearch(e.target.value)} />
         </div>
         <div className="ct-icons">
-          <i className="fa fa-bell" title="Notifications" onClick={() => setShowNotif(!showNotif)}></i>
+          <i className="fa fa-bell" title="Notifications" onClick={openNotif}></i>
           <span className="notification-badge">{notifs.length}</span>
           <i className="fa fa-user-circle" title="Logout / Profile" onClick={handleLogout}></i>
           <div className={`notif-dropdown ${showNotif ? 'show' : ''}`} onClick={(e) => e.stopPropagation()}>
@@ -55,7 +61,7 @@ export default function Layout({ children, searchPlaceholder = 'Search...', onSe
               {notifs.length === 0 && <div className="notif-empty">No new notifications</div>}
               {notifs.map((n, i) => (
                 <div className="notif-item" key={i}>
-                  <i className="fa fa-circle-info" style={{ color: '#ffc107', marginTop: 3 }}></i>
+                  <i className={`fa ${n.type === 'low_stock' ? 'fa-triangle-exclamation' : 'fa-circle-info'}`} style={{ color: n.type === 'low_stock' ? '#dc3545' : '#ffc107', marginTop: 3 }}></i>
                   <div>
                     <h4>{n.title}</h4>
                     <p>{n.msg}</p>
