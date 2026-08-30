@@ -1,54 +1,51 @@
-import { useEffect } from "react";
-import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
-import { HOME } from "@/constants/testIds";
+import React from 'react';
+import './App.css';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import EmployeeManagement from './pages/EmployeeManagement';
+import PartyManagement from './pages/PartyManagement';
+import ReceiptManagement from './pages/ReceiptManagement';
+import ExpenseManagement from './pages/ExpenseManagement';
+import EmployeeWallet from './pages/EmployeeWallet';
+import DispatchManagement from './pages/DispatchManagement';
+import StockManagement from './pages/StockManagement';
+import ProductionManagement from './pages/ProductionManagement';
+import DChallanManagement from './pages/DChallanManagement';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          data-testid={HOME.emergentLink}
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+function Protected({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  return children;
+}
 
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
+            <Route path="/employees" element={<Protected><EmployeeManagement /></Protected>} />
+            <Route path="/parties" element={<Protected><PartyManagement /></Protected>} />
+            <Route path="/receipts" element={<Protected><ReceiptManagement /></Protected>} />
+            <Route path="/expenses" element={<Protected><ExpenseManagement /></Protected>} />
+            <Route path="/wallet" element={<Protected><EmployeeWallet /></Protected>} />
+            <Route path="/dispatch" element={<Protected><DispatchManagement /></Protected>} />
+            <Route path="/stock" element={<Protected><StockManagement /></Protected>} />
+            <Route path="/production" element={<Protected><ProductionManagement /></Protected>} />
+            <Route path="/dchallan" element={<Protected><DChallanManagement /></Protected>} />
+            <Route path="/reports" element={<Protected><Reports /></Protected>} />
+            <Route path="/settings" element={<Protected><Settings /></Protected>} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </div>
   );
 }

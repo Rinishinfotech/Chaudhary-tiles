@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>D-Challan Management - CT Management</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; font-family:Poppins,sans-serif; }
+body{ background:#f2f5fa; color: #333; }
+
+/* HEADER */
+.header{
+  height:65px; background:#0b1f3a; display:flex; align-items:center;
+  justify-content:space-between; padding:0 18px; color:white; position:fixed;
+  top:0; left:0; right:0; z-index:999;
+}
+.logo{ font-size:20px; font-weight:700; color:#ffc107; cursor:pointer; }
+.search{ flex:1; margin:0 20px; }
+.search input{ width:100%; padding:10px 14px; border:none; border-radius:8px; outline:none; font-size:14px; }
+.icons{ display:flex; gap:18px; align-items:center; font-size:20px; position: relative; }
+
+/* SIDEBAR */
+.sidebar{ position:fixed; top:65px; left:0; bottom:0; width:240px; background:#132c4f; overflow-y:auto; }
+.sidebar ul{ list-style:none; }
+.sidebar ul li{ padding:15px 20px; color:white; cursor:pointer; transition:.3s; font-size:14px; }
+.sidebar ul li:hover, .sidebar ul li.active{ background:#ffc107; color:black; font-weight: 600; }
+.sidebar ul li i{ width:28px; }
+
+/* MAIN AREA */
+.main{ margin-left:240px; margin-top:65px; padding:20px; min-height: calc(100vh - 65px); }
+.page-title {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
+  background: white; padding: 16px 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+  flex-wrap: wrap; gap: 12px;
+}
+.page-title h2 { color: #0b1f3a; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+.btn-action {
+  background: #0b1f3a; color: #ffc107; border: none; padding: 10px 16px;
+  border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px; transition: 0.2s;
+}
+.btn-action:hover { background: #132c4f; }
+
+/* MASTER FILTER BOX */
+.filter-box {
+  background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;
+}
+.filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.filter-group { display: flex; flex-direction: column; gap: 4px; }
+.filter-group label { font-size: 11px; font-weight: 600; color: #475569; }
+.filter-group input, .filter-group select { padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; }
+
+/* SUMMARY STATS BAR */
+.summary-bar {
+  background: #132c4f; color: white; padding: 14px 18px; border-radius: 10px; display: flex;
+  justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
+}
+.summary-stats { display: flex; gap: 12px; font-size: 13px; font-weight: 600; flex-wrap: wrap; }
+.stat-pill { background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); }
+.stat-pill strong { color: #ffc107; }
+
+/* CHALLAN CARDS GRID */
+.challan-list { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.challan-card { background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+.card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+.dc-no-badge { background: #0b1f3a; color: #ffc107; font-weight: 700; padding: 4px 10px; border-radius: 6px; font-size: 13px; }
+.dc-date-badge { background: #f1f5f9; color: #334155; font-weight: 600; padding: 4px 10px; border-radius: 6px; font-size: 12px; }
+
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 12px; font-size: 13px; }
+.info-item span { display: block; font-size: 11px; color: #64748b; font-weight: 600; }
+.info-item strong { color: #0b1f3a; }
+
+.items-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
+.items-table th, .items-table td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #f1f5f9; }
+.items-table th { background: #f8fafc; color: #475569; font-weight: 600; }
+
+.challan-photo-thumb { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; cursor: pointer; border: 1px solid #cbd5e1; }
+
+/* MODALS */
+.modal-overlay{ display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; padding:15px; }
+.modal{ background:white; width:100%; max-width:720px; border-radius:14px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+.modal-header{ display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #f2f5fa; padding-bottom:10px; margin-bottom:18px; }
+.modal-header h3{ color:#0b1f3a; font-size:17px; }
+.modal-close{ font-size:20px; cursor:pointer; color:#777; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 15px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label { font-size: 12px; font-weight: 600; color: #444; }
+.form-group input, .form-group select { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 13px; }
+
+.items-entry-box { background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px; }
+.items-entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.row-item { display: grid; grid-template-columns: 2fr 1fr 1fr 35px; gap: 8px; align-items: center; margin-bottom: 8px; }
+.btn-remove-row { color: #ef4444; cursor: pointer; text-align: center; font-size: 16px; }
+.btn-add-row { background: #e2e8f0; color: #0b1f3a; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-submit { width: 100%; background: #0b1f3a; color: #ffc107; border: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; }
+
+/* MOBILE NAV */
+.bottomnav{ display:none; }
+@media(max-width:900px){
+  .sidebar{ display:none; } .main{ margin-left:0; padding-bottom:90px; } .search{ display:none; } .header{ padding:0 10px; }
+  .bottomnav{ display:flex; position:fixed; bottom:0; left:0; right:0; height:65px; background:white; justify-content:space-around; align-items:center; box-shadow:0 -2px 10px rgba(0,0,0,.1); z-index:999; }
+  .bottomnav i{ font-size:22px; color:#0b1f3a; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo" onclick="openPage('super_admin_dashboard.html')">CT Management</div>
+  <div class="search">
+    <input type="text" id="globalSearch" placeholder="Search Challan No, Party, Vehicle, Driver, Item..." onkeyup="renderChallans()">
+  </div>
+  <div class="icons">
+    <i class="fa fa-bell" style="cursor:pointer;" title="Notifications"></i>
+    <i class="fa fa-user-circle" onclick="logout()" title="Logout / Profile"></i>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <ul>
+    <li onclick="openPage('super_admin_dashboard.html')"><i class="fa fa-house"></i> Dashboard</li>
+    <li onclick="openPage('employee_management.html')"><i class="fa fa-users"></i> Employee Management</li>
+    <li onclick="openPage('party_management.html')"><i class="fa fa-user-group"></i> Party Management</li>
+    <li onclick="openPage('receipt_management.html')"><i class="fa fa-wallet"></i> Receipt Management</li>
+    <li onclick="openPage('expense_management.html')"><i class="fa fa-money-bill-wave"></i> Expense Management</li>
+    <li onclick="openPage('employee_wallet.html')"><i class="fa fa-briefcase"></i> Employee Wallet</li>
+    <li onclick="openPage('dispatch_management.html')"><i class="fa fa-truck"></i> Dispatch Management</li>
+    <li onclick="openPage('stock_management.html')"><i class="fa fa-cubes"></i> Stock Management</li>
+    <li onclick="openPage('production_management.html')"><i class="fa fa-industry"></i> Production</li>
+    <li class="active" onclick="openPage('dchallan_management.html')"><i class="fa fa-file-lines"></i> D Challan</li>
+    <li onclick="openPage('reports.html')"><i class="fa fa-chart-column"></i> Reports</li>
+    <li onclick="openPage('settings.html')"><i class="fa fa-gear"></i> Settings</li>
+    <li onclick="logout()"><i class="fa fa-right-from-bracket"></i> Logout</li>
+  </ul>
+</div>
+
+<!-- MAIN AREA -->
+<div class="main">
+
+  <div class="page-title">
+    <h2><i class="fa fa-file-circle-check" style="color:#ffc107;"></i> Delivery Challan Master</h2>
+    <div id="adminActionBar" style="display:none;">
+      <button class="btn-action" onclick="openChallanModal()">
+        <i class="fa fa-plus-circle"></i> Create New D-Challan
+      </button>
+    </div>
+  </div>
+
+  <!-- MASTER FILTERS (EXCEL-STYLE FULL FILTERING) -->
+  <div class="filter-box">
+    <div class="filter-grid">
+      <div class="filter-group">
+        <label>From Date</label>
+        <input type="date" id="filterFromDate" onchange="renderChallans()">
+      </div>
+      <div class="filter-group">
+        <label>To Date</label>
+        <input type="date" id="filterToDate" onchange="renderChallans()">
+      </div>
+      <div class="filter-group">
+        <label>Dispatch Plant</label>
+        <select id="filterPlant" onchange="renderChallans()">
+          <option value="ALL">All Plants</option>
+          <option value="Sipara Plant">Sipara Plant</option>
+          <option value="Nandlal Chhapra Plant">Nandlal Chhapra Plant</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Party Name (Searchable)</label>
+        <input type="text" id="filterParty" list="partyListFilter" placeholder="Select or Type Party..." oninput="renderChallans()">
+        <datalist id="partyListFilter"></datalist>
+      </div>
+      <div class="filter-group">
+        <label>Vehicle No.</label>
+        <input type="text" id="filterVehicle" placeholder="e.g. BR01..." onkeyup="renderChallans()">
+      </div>
+      <div class="filter-group">
+        <label>Driver Name</label>
+        <input type="text" id="filterDriver" placeholder="Driver name..." onkeyup="renderChallans()">
+      </div>
+      <div class="filter-group">
+        <label>Item / Pattern</label>
+        <input type="text" id="filterItem" placeholder="e.g. Zig-Zag..." onkeyup="renderChallans()">
+      </div>
+      <div class="filter-group">
+        <label>Color</label>
+        <select id="filterColor" onchange="renderChallans()">
+          <option value="ALL">All Colors</option>
+          <option value="Red">Red</option>
+          <option value="Yellow">Yellow</option>
+          <option value="Grey">Grey</option>
+          <option value="Black">Black</option>
+          <option value="White">White</option>
+        </select>
+      </div>
+      <div class="filter-group" style="justify-content: flex-end;">
+        <button onclick="resetFilters()" style="padding: 8px; background: #64748b; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight:600;">
+          <i class="fa fa-rotate-left"></i> Reset Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY STATS BAR -->
+  <div class="summary-bar">
+    <div class="summary-stats">
+      <span class="stat-pill">Total Trips: <strong id="statTotalTrips">0</strong></span>
+      <span class="stat-pill">Total Delivered Pcs: <strong id="statTotalPcs">0 Pcs</strong></span>
+      <span class="stat-pill">Unique Vehicles: <strong id="statUniqueVehicles">0</strong></span>
+      <span class="stat-pill">Filtered Challans: <strong id="statChallanCount">0</strong></span>
+    </div>
+  </div>
+
+  <!-- CHALLANS LIST CONTAINER -->
+  <div class="challan-list" id="challanContainer"></div>
+
+</div>
+
+<!-- CREATE / EDIT D-CHALLAN MODAL -->
+<div class="modal-overlay" id="challanModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle"><i class="fa fa-file-invoice" style="color:#ffc107;"></i> Create Delivery Challan</h3>
+      <i class="fa fa-xmark modal-close" onclick="closeChallanModal()"></i>
+    </div>
+
+    <form onsubmit="saveChallanEntry(event)">
+      <input type="hidden" id="editingChallanId" value="">
+      
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="dcDate" required>
+        </div>
+        <div class="form-group">
+          <label>D-Challan Number</label>
+          <input type="text" id="dcNumber" placeholder="e.g. DC-2026-001" required>
+        </div>
+        <div class="form-group">
+          <label>Dispatch Plant</label>
+          <select id="dcPlant" required onchange="populateItemDropdownsAll()">
+            <option value="Sipara Plant">Sipara Plant</option>
+            <option value="Nandlal Chhapra Plant">Nandlal Chhapra Plant</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Party Name (Searchable Select)</label>
+          <input type="text" id="dcParty" list="partyListForm" placeholder="Type or Select Party..." required autocomplete="off">
+          <datalist id="partyListForm"></datalist>
+        </div>
+        <div class="form-group">
+          <label>Site Address</label>
+          <input type="text" id="dcSiteAddr" placeholder="Delivery site address">
+        </div>
+        <div class="form-group">
+          <label>Site Mobile No.</label>
+          <input type="tel" id="dcSiteMobile" placeholder="Contact number at site">
+        </div>
+        <div class="form-group">
+          <label>Vehicle Number</label>
+          <input type="text" id="dcVehicle" placeholder="e.g. BR-01-GA-1234" required>
+        </div>
+        <div class="form-group">
+          <label>Driver Name</label>
+          <input type="text" id="dcDriverName" placeholder="Driver name" required>
+        </div>
+        <div class="form-group">
+          <label>Driver Mobile</label>
+          <input type="tel" id="dcDriverMobile" placeholder="Driver phone number">
+        </div>
+        <div class="form-group">
+          <label>Challan Photo (Optional)</label>
+          <input type="file" id="dcPhotoInput" accept="image/*" onchange="previewChallanPhoto(event)">
+          <input type="hidden" id="dcPhotoBase64" value="">
+        </div>
+      </div>
+
+      <!-- UNLIMITED ITEMS ENTRY SECTION -->
+      <div class="items-entry-box">
+        <div class="items-entry-header">
+          <h5 style="color:#0b1f3a;"><i class="fa fa-cubes"></i> Items Dispatched (Stock Auto-Deduct):</h5>
+          <button type="button" class="btn-add-row" onclick="addItemRow()"><i class="fa fa-plus"></i> Add More Item</button>
+        </div>
+        <div id="itemRowsContainer"></div>
+      </div>
+
+      <button type="submit" class="btn-submit">Save & Minus Plant Stock</button>
+    </form>
+  </div>
+</div>
+
+<!-- IMAGE PREVIEW MODAL -->
+<div class="modal-overlay" id="imgModal">
+  <div class="modal" style="max-width:500px; text-align:center;">
+    <div class="modal-header">
+      <h3>Challan Image</h3>
+      <i class="fa fa-xmark modal-close" onclick="closeImgModal()"></i>
+    </div>
+    <img id="fullChallanImg" src="" style="width:100%; border-radius:8px; border:1px solid #cbd5e1;">
+  </div>
+</div>
+
+<!-- BOTTOM NAVIGATION FOR MOBILE -->
+<div class="bottomnav">
+  <i class="fa fa-house" onclick="openPage('super_admin_dashboard.html')"></i>
+  <i class="fa fa-users" onclick="openPage('employee_management.html')"></i>
+  <i class="fa fa-wallet" onclick="openPage('receipt_management.html')"></i>
+  <i class="fa fa-chart-column" onclick="openPage('reports.html')"></i>
+  <i class="fa fa-gear" onclick="openPage('settings.html')"></i>
+</div>
+
+<script>
+let activeUser = null;
+let stockMaster = [];
+let partyMaster = [];
+let challanLogs = [];
+
+function checkUserSession() {
+  const session = localStorage.getItem('ct_active_user');
+  if(!session) {
+    activeUser = { role: "Super Admin", name: "Admin User" };
+    localStorage.setItem('ct_active_user', JSON.stringify(activeUser));
+  } else {
+    activeUser = JSON.parse(session);
+  }
+
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+  if(isAdmin) {
+    document.getElementById('adminActionBar').style.display = "block";
+  }
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  document.getElementById('dcDate').value = todayStr;
+
+  loadInitialData();
+}
+
+function formatDateDisplay(dateStr) {
+  if(!dateStr) return '';
+  const parts = dateStr.split('-');
+  if(parts.length !== 3) return dateStr;
+  return `${parts[2]}-${parts[1]}-${parts[0].slice(-2)}`;
+}
+
+function loadInitialData() {
+  // Load Stock Master
+  const storedStock = localStorage.getItem('ct_stock_master_v2');
+  if(storedStock) {
+    stockMaster = JSON.parse(storedStock);
+  } else {
+    // Default Fallback Stock Items for Testing
+    stockMaster = [
+      { id: "STK1", plant: "Sipara Plant", name: "I-Shape Paver (60mm)", colors: { Red: 5000, Grey: 3000, Yellow: 2000 } },
+      { id: "STK2", plant: "Sipara Plant", name: "Zig-Zag Paver (80mm)", colors: { Red: 4000, Grey: 4000 } },
+      { id: "STK3", plant: "Nandlal Chhapra Plant", name: "Hexagonal Paver", colors: { Yellow: 3000, Red: 1000 } },
+      { id: "STK4", plant: "Nandlal Chhapra Plant", name: "Cover Block 25mm", colors: { "General/NA": 10000 } }
+    ];
+    localStorage.setItem('ct_stock_master_v2', JSON.stringify(stockMaster));
+  }
+
+  // Load Party Master
+  const storedParties = localStorage.getItem('ct_parties');
+  if(storedParties) {
+    partyMaster = JSON.parse(storedParties);
+  } else {
+    partyMaster = [
+      { id: "P1", name: "Chaudhary Constructions" },
+      { id: "P2", name: "Sharma Builders" },
+      { id: "P3", name: "Verma Enterprises" }
+    ];
+  }
+  populatePartyDataLists();
+
+  // Load Challan Logs
+  const storedChallans = localStorage.getItem('ct_challan_logs_v1');
+  challanLogs = storedChallans ? JSON.parse(storedChallans) : [];
+
+  renderChallans();
+}
+
+// Populate Searchable Party Datalist
+function populatePartyDataLists() {
+  const formList = document.getElementById('partyListForm');
+  const filterList = document.getElementById('partyListFilter');
+
+  formList.innerHTML = "";
+  filterList.innerHTML = "";
+
+  partyMaster.forEach(p => {
+    formList.innerHTML += `<option value="${p.name}">`;
+    filterList.innerHTML += `<option value="${p.name}">`;
+  });
+}
+
+// RENDER AND ADVANCED EXCEL FILTERING LOGIC
+function renderChallans() {
+  const container = document.getElementById('challanContainer');
+  const globalQ = document.getElementById('globalSearch').value.toLowerCase().trim();
+  const fromDate = document.getElementById('filterFromDate').value;
+  const toDate = document.getElementById('filterToDate').value;
+  const plant = document.getElementById('filterPlant').value;
+  const partyQ = document.getElementById('filterParty').value.toLowerCase().trim();
+  const vehicleQ = document.getElementById('filterVehicle').value.toLowerCase().trim();
+  const driverQ = document.getElementById('filterDriver').value.toLowerCase().trim();
+  const itemQ = document.getElementById('filterItem').value.toLowerCase().trim();
+  const colorFilter = document.getElementById('filterColor').value;
+
+  container.innerHTML = "";
+
+  let totalTrips = 0;
+  let totalPcs = 0;
+  let challanCount = 0;
+  let vehicleSet = new Set();
+
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+
+  challanLogs.forEach((ch) => {
+    // 1. Date Range Filter (e.g. July month or any range)
+    if(fromDate && ch.date < fromDate) return;
+    if(toDate && ch.date > toDate) return;
+
+    // 2. Plant Filter
+    if(plant !== "ALL" && ch.plant !== plant) return;
+
+    // 3. Party Filter
+    if(partyQ && !ch.party.toLowerCase().includes(partyQ)) return;
+
+    // 4. Vehicle Filter
+    if(vehicleQ && !ch.vehicle.toLowerCase().includes(vehicleQ)) return;
+
+    // 5. Driver Filter
+    if(driverQ && !ch.driverName.toLowerCase().includes(driverQ)) return;
+
+    // 6. Item & Color Filter inside Challan Items
+    let matchedItems = ch.items || [];
+    if(itemQ) {
+      matchedItems = matchedItems.filter(it => it.itemName.toLowerCase().includes(itemQ));
+    }
+    if(colorFilter !== "ALL") {
+      matchedItems = matchedItems.filter(it => it.color === colorFilter);
+    }
+
+    if((itemQ || colorFilter !== "ALL") && matchedItems.length === 0) return;
+
+    // Global Search Check
+    const searchString = `${ch.dcNumber} ${ch.party} ${ch.vehicle} ${ch.driverName} ${ch.plant} ${ch.siteAddr}`.toLowerCase();
+    const hasItemMatchInGlobal = ch.items && ch.items.some(i => i.itemName.toLowerCase().includes(globalQ) || i.color.toLowerCase().includes(globalQ));
+    if(globalQ && !searchString.includes(globalQ) && !hasItemMatchInGlobal) return;
+
+    challanCount++;
+    totalTrips++;
+    if(ch.vehicle) vehicleSet.add(ch.vehicle.trim().toUpperCase());
+
+    let itemsRowsHtml = "";
+    (ch.items || []).forEach(it => {
+      // Highlight matching item/color if filtered
+      const isFilteredItem = (!itemQ || it.itemName.toLowerCase().includes(itemQ)) && (colorFilter === "ALL" || it.color === colorFilter);
+      if(isFilteredItem) {
+        totalPcs += (it.qty || 0);
+      }
+
+      itemsRowsHtml += `
+        <tr style="${!isFilteredItem ? 'opacity:0.4;' : ''}">
+          <td><strong>${it.itemName}</strong></td>
+          <td>${it.color}</td>
+          <td><strong>${it.qty.toLocaleString()} Pcs</strong></td>
+        </tr>
+      `;
+    });
+
+    const imgThumb = ch.photo ? `<img src="${ch.photo}" class="challan-photo-thumb" onclick="viewFullImg('${ch.photo}')">` : '<span style="font-size:11px; color:#94a3b8;">No Photo</span>';
+
+    const adminButtons = isAdmin ? `
+      <div style="display:flex; gap:12px;">
+        <i class="fa fa-pen-to-square" style="color:#2563eb; cursor:pointer;" title="Edit Challan" onclick="editChallan('${ch.id}')"></i>
+        <i class="fa fa-trash" style="color:#ef4444; cursor:pointer;" title="Delete Challan" onclick="deleteChallan('${ch.id}')"></i>
+      </div>
+    ` : '';
+
+    container.innerHTML += `
+      <div class="challan-card">
+        <div class="card-header">
+          <div style="display:flex; gap:10px; align-items:center;">
+            <span class="dc-no-badge"><i class="fa fa-file-invoice"></i> ${ch.dcNumber}</span>
+            <span class="dc-date-badge"><i class="fa fa-calendar-day"></i> ${formatDateDisplay(ch.date)}</span>
+            <span style="font-size:12px; font-weight:700; color:#0b1f3a;">${ch.plant}</span>
+          </div>
+          ${adminButtons}
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item"><span>PARTY NAME:</span><strong>${ch.party}</strong></div>
+          <div class="info-item"><span>VEHICLE / DRIVER:</span><strong>${ch.vehicle} (${ch.driverName} - ${ch.driverMobile || 'N/A'})</strong></div>
+          <div class="info-item"><span>SITE LOCATION:</span><strong>${ch.siteAddr || 'N/A'} (Mob: ${ch.siteMobile || 'N/A'})</strong></div>
+          <div class="info-item"><span>CHALLAN IMAGE:</span>${imgThumb}</div>
+        </div>
+
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>Item / Pattern</th>
+              <th>Color</th>
+              <th>Dispatched Qty</th>
+            </tr>
+          </thead>
+          <tbody>${itemsRowsHtml}</tbody>
+        </table>
+      </div>
+    `;
+  });
+
+  document.getElementById('statTotalTrips').innerText = totalTrips;
+  document.getElementById('statTotalPcs').innerText = totalPcs.toLocaleString() + " Pcs";
+  document.getElementById('statUniqueVehicles').innerText = vehicleSet.size;
+  document.getElementById('statChallanCount').innerText = challanCount;
+}
+
+function resetFilters() {
+  document.getElementById('filterFromDate').value = "";
+  document.getElementById('filterToDate').value = "";
+  document.getElementById('filterPlant').value = "ALL";
+  document.getElementById('filterParty').value = "";
+  document.getElementById('filterVehicle').value = "";
+  document.getElementById('filterDriver').value = "";
+  document.getElementById('filterItem').value = "";
+  document.getElementById('filterColor').value = "ALL";
+  document.getElementById('globalSearch').value = "";
+  renderChallans();
+}
+
+function openChallanModal() {
+  document.getElementById('editingChallanId').value = "";
+  document.getElementById('modalTitle').innerHTML = `<i class="fa fa-file-invoice" style="color:#ffc107;"></i> Create Delivery Challan`;
+  document.getElementById('dcNumber').value = "DC-" + Math.floor(1000 + Math.random() * 9000);
+  document.getElementById('dcParty').value = "";
+  document.getElementById('dcSiteAddr').value = "";
+  document.getElementById('dcSiteMobile').value = "";
+  document.getElementById('dcVehicle').value = "";
+  document.getElementById('dcDriverName').value = "";
+  document.getElementById('dcDriverMobile').value = "";
+  document.getElementById('dcPhotoBase64').value = "";
+
+  document.getElementById('itemRowsContainer').innerHTML = "";
+  addItemRow(); // Create first row
+
+  document.getElementById('challanModal').style.display = "flex";
+}
+
+function closeChallanModal() { document.getElementById('challanModal').style.display = "none"; }
+
+function previewChallanPhoto(e) {
+  const file = e.target.files[0];
+  if(file) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      document.getElementById('dcPhotoBase64').value = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+// DYNAMIC UNLIMITED ITEM ROWS ADDITION
+function addItemRow() {
+  const container = document.getElementById('itemRowsContainer');
+  const rowId = "row_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+
+  const rowDiv = document.createElement('div');
+  rowDiv.className = 'row-item';
+  rowDiv.id = rowId;
+
+  rowDiv.innerHTML = `
+    <select class="item-select-dd" required></select>
+    <select class="color-select-dd" required>
+      <option value="Red">Red</option>
+      <option value="Yellow">Yellow</option>
+      <option value="Grey">Grey</option>
+      <option value="Black">Black</option>
+      <option value="White">White</option>
+      <option value="General/NA">General/NA</option>
+    </select>
+    <input type="number" placeholder="Qty Pcs" min="1" required class="qty-input">
+    <span class="btn-remove-row" onclick="removeRow('${rowId}')"><i class="fa fa-trash"></i></span>
+  `;
+
+  container.appendChild(rowDiv);
+  populateSingleRowDropdown(rowDiv.querySelector('.item-select-dd'));
+}
+
+function removeRow(rowId) {
+  const container = document.getElementById('itemRowsContainer');
+  if(container.children.length > 1) {
+    const row = document.getElementById(rowId);
+    if(row) row.remove();
+  } else {
+    alert("At least one item row is required!");
+  }
+}
+
+// POPULATE ITEM DROPDOWN BASED ON SELECTED PLANT
+function populateSingleRowDropdown(selectElement) {
+  const plant = document.getElementById('dcPlant').value;
+  const plantItems = stockMaster.filter(s => s.plant === plant);
+
+  selectElement.innerHTML = "";
+  if(plantItems.length === 0) {
+    selectElement.innerHTML = `<option value="">No Items available for ${plant}</option>`;
+  } else {
+    plantItems.forEach(i => {
+      selectElement.innerHTML += `<option value="${i.id}">${i.name}</option>`;
+    });
+  }
+}
+
+function populateItemDropdownsAll() {
+  const selects = document.querySelectorAll('.item-select-dd');
+  selects.forEach(sel => populateSingleRowDropdown(sel));
+}
+
+// SAVE CHALLAN AND DEDUCT PLANT STOCK PERFECTLY
+function saveChallanEntry(e) {
+  e.preventDefault();
+
+  const editingId = document.getElementById('editingChallanId').value;
+  const date = document.getElementById('dcDate').value;
+  const dcNumber = document.getElementById('dcNumber').value;
+  const plant = document.getElementById('dcPlant').value;
+  const party = document.getElementById('dcParty').value.trim();
+  const siteAddr = document.getElementById('dcSiteAddr').value;
+  const siteMobile = document.getElementById('dcSiteMobile').value;
+  const vehicle = document.getElementById('dcVehicle').value;
+  const driverName = document.getElementById('dcDriverName').value;
+  const driverMobile = document.getElementById('dcDriverMobile').value;
+  const photo = document.getElementById('dcPhotoBase64').value;
+
+  if(!party) return alert("Please select or enter Party Name.");
+
+  // If Editing, revert previous stock minus first
+  if(editingId) revertStockForChallan(editingId);
+
+  let itemsData = [];
+  const rowElements = document.querySelectorAll('#itemRowsContainer .row-item');
+
+  let insufficientStock = false;
+
+  rowElements.forEach(row => {
+    const itemId = row.querySelector('.item-select-dd').value;
+    const color = row.querySelector('.color-select-dd').value;
+    const qty = parseInt(row.querySelector('.qty-input').value || 0);
+
+    const stItem = stockMaster.find(s => s.id === itemId && s.plant === plant);
+    if(stItem && qty > 0) {
+      itemsData.push({ itemId, itemName: stItem.name, color, qty });
+
+      // Live Plant Stock Minus
+      if(!stItem.colors) stItem.colors = {};
+      if(!stItem.colors[color]) stItem.colors[color] = 0;
+
+      stItem.colors[color] = Math.max(0, stItem.colors[color] - qty);
+    }
+  });
+
+  if(itemsData.length === 0) {
+    return alert("Please enter valid item quantity.");
+  }
+
+  const challanEntry = {
+    id: editingId ? editingId : "DC-" + Date.now(),
+    date, dcNumber, plant, party, siteAddr, siteMobile,
+    vehicle, driverName, driverMobile, photo,
+    items: itemsData, createdBy: activeUser.name
+  };
+
+  if(editingId) {
+    const idx = challanLogs.findIndex(c => c.id === editingId);
+    if(idx !== -1) challanLogs[idx] = challanEntry;
+  } else {
+    challanLogs.unshift(challanEntry);
+  }
+
+  // Save changes to localStorage
+  localStorage.setItem('ct_stock_master_v2', JSON.stringify(stockMaster));
+  localStorage.setItem('ct_challan_logs_v1', JSON.stringify(challanLogs));
+
+  renderChallans();
+  closeChallanModal();
+  alert(`Delivery Challan Saved & Plant Stock Updated Successfully!`);
+}
+
+function revertStockForChallan(challanId) {
+  const ch = challanLogs.find(c => c.id === challanId);
+  if(!ch || !ch.items) return;
+
+  ch.items.forEach(it => {
+    let stItem = stockMaster.find(s => s.id === it.itemId && s.plant === ch.plant);
+    if(stItem) {
+      if(!stItem.colors) stItem.colors = {};
+      if(!stItem.colors[it.color]) stItem.colors[it.color] = 0;
+      stItem.colors[it.color] += it.qty;
+    }
+  });
+}
+
+function editChallan(challanId) {
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+  if(!isAdmin) return alert("Access Denied: Admin level required.");
+
+  const ch = challanLogs.find(c => c.id === challanId);
+  if(!ch) return;
+
+  document.getElementById('editingChallanId').value = ch.id;
+  document.getElementById('modalTitle').innerHTML = `<i class="fa fa-pen-to-square" style="color:#ffc107;"></i> Edit Delivery Challan`;
+  document.getElementById('dcDate').value = ch.date;
+  document.getElementById('dcNumber').value = ch.dcNumber;
+  document.getElementById('dcPlant').value = ch.plant;
+  document.getElementById('dcParty').value = ch.party;
+  document.getElementById('dcSiteAddr').value = ch.siteAddr || '';
+  document.getElementById('dcSiteMobile').value = ch.siteMobile || '';
+  document.getElementById('dcVehicle').value = ch.vehicle;
+  document.getElementById('dcDriverName').value = ch.driverName;
+  document.getElementById('dcDriverMobile').value = ch.driverMobile || '';
+  document.getElementById('dcPhotoBase64').value = ch.photo || '';
+
+  document.getElementById('itemRowsContainer').innerHTML = "";
+
+  if(ch.items && ch.items.length > 0) {
+    ch.items.forEach(it => {
+      const container = document.getElementById('itemRowsContainer');
+      const rowId = "row_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'row-item';
+      rowDiv.id = rowId;
+
+      rowDiv.innerHTML = `
+        <select class="item-select-dd" required></select>
+        <select class="color-select-dd" required>
+          <option value="Red" ${it.color==='Red'?'selected':''}>Red</option>
+          <option value="Yellow" ${it.color==='Yellow'?'selected':''}>Yellow</option>
+          <option value="Grey" ${it.color==='Grey'?'selected':''}>Grey</option>
+          <option value="Black" ${it.color==='Black'?'selected':''}>Black</option>
+          <option value="White" ${it.color==='White'?'selected':''}>White</option>
+          <option value="General/NA" ${it.color==='General/NA'?'selected':''}>General/NA</option>
+        </select>
+        <input type="number" placeholder="Qty Pcs" min="1" required class="qty-input" value="${it.qty}">
+        <span class="btn-remove-row" onclick="removeRow('${rowId}')"><i class="fa fa-trash"></i></span>
+      `;
+
+      container.appendChild(rowDiv);
+      const sel = rowDiv.querySelector('.item-select-dd');
+      populateSingleRowDropdown(sel);
+      sel.value = it.itemId;
+    });
+  } else {
+    addItemRow();
+  }
+
+  document.getElementById('challanModal').style.display = "flex";
+}
+
+function deleteChallan(challanId) {
+  const isAdmin = (activeUser.role === "Super Admin" || activeUser.role === "Admin");
+  if(!isAdmin) return alert("Access Denied: Admin level required.");
+
+  if(confirm("क्या आप इस D-Challan को डिलीट करना चाहते हैं? इससे प्लांट स्टॉक वापस (+) हो जाएगा।")) {
+    revertStockForChallan(challanId);
+    challanLogs = challanLogs.filter(c => c.id !== challanId);
+
+    localStorage.setItem('ct_stock_master_v2', JSON.stringify(stockMaster));
+    localStorage.setItem('ct_challan_logs_v1', JSON.stringify(challanLogs));
+
+    renderChallans();
+    alert("Challan deleted & stock restored successfully!");
+  }
+}
+
+function viewFullImg(src) {
+  document.getElementById('fullChallanImg').src = src;
+  document.getElementById('imgModal').style.display = "flex";
+}
+function closeImgModal() { document.getElementById('imgModal').style.display = "none"; }
+
+function openPage(page){ window.location.href = page; }
+function logout(){
+  if(confirm("Logout from CT Management Portal?")){
+    localStorage.removeItem('ct_active_user');
+    window.location.href = "login.html";
+  }
+}
+
+window.onload = checkUserSession;
+</script>
+</body>
+</html>

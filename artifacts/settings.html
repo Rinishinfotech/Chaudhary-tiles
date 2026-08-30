@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Settings - CT Management</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Poppins,sans-serif;
+}
+
+body{
+  background:#f2f5fa;
+  color: #333;
+}
+
+/* HEADER */
+.header{
+  height:65px;
+  background:#0b1f3a;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  color:white;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:999;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  color:#ffc107;
+  cursor:pointer;
+}
+
+.search{
+  flex:1;
+  margin:0 20px;
+}
+
+.search input{
+  width:100%;
+  padding:11px;
+  border:none;
+  border-radius:8px;
+  outline:none;
+}
+
+.icons{
+  display:flex;
+  gap:18px;
+  align-items:center;
+  font-size:20px;
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: 35px;
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;
+  top:65px;
+  left:0;
+  bottom:0;
+  width:240px;
+  background:#132c4f;
+  overflow-y:auto;
+}
+
+.sidebar ul{ list-style:none; }
+
+.sidebar ul li{
+  padding:16px 20px;
+  color:white;
+  cursor:pointer;
+  transition:.3s;
+  font-size:15px;
+}
+
+.sidebar ul li:hover, .sidebar ul li.active{
+  background:#ffc107;
+  color:black;
+}
+
+.sidebar ul li i{ width:30px; }
+
+/* MAIN */
+.main{
+  margin-left:240px;
+  margin-top:65px;
+  padding:20px;
+  min-height: calc(100vh - 65px);
+}
+
+.page-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.page-title h2 { color: #0b1f3a; font-size: 18px; }
+
+/* SETTINGS GRID */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.card-box {
+  background: white;
+  border-radius: 15px;
+  padding: 22px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.card-box h3 {
+  color: #0b1f3a;
+  font-size: 16px;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #f0f2f5;
+  padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+  padding: 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  outline: none;
+  font-size: 13px;
+}
+
+.btn-save {
+  background: #0b1f3a;
+  color: #ffc107;
+  border: none;
+  padding: 11px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.btn-save:hover { background: #132c4f; }
+
+.btn-backup {
+  background: #059669;
+  color: white;
+  border: none;
+  padding: 11px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.btn-backup:hover { background: #047857; }
+
+.btn-reset {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 11px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  font-size: 14px;
+}
+
+.btn-reset:hover { background: #bb2d3b; }
+
+/* MOBILE NAV */
+.bottomnav{ display:none; }
+
+@media(max-width:900px){
+  .sidebar{ display:none; }
+  .main{ margin-left:0; padding-bottom:90px; }
+  .search{ display:none; }
+  .header{ padding:0 10px; }
+  .bottomnav{
+    display:flex;
+    position:fixed;
+    bottom:0; left:0; right:0;
+    height:65px;
+    background:white;
+    justify-content:space-around;
+    align-items:center;
+    box-shadow:0 -2px 10px rgba(0,0,0,.1);
+    z-index:999;
+  }
+  .bottomnav i{ font-size:22px; color:#0b1f3a; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo" onclick="openPage('super_admin_dashboard.html')">CT Management</div>
+  <div class="search">
+    <input type="text" placeholder="Search system preferences...">
+  </div>
+  <div class="icons">
+    <i class="fa fa-bell" style="cursor:pointer;" title="Notifications"></i>
+    <span class="notification-badge" id="notifBadge">1</span>
+    <i class="fa fa-user-circle" onclick="logout()" title="Logout / Profile"></i>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <ul>
+    <li onclick="openPage('super_admin_dashboard.html')"><i class="fa fa-house"></i> Dashboard</li>
+    <li onclick="openPage('employee_management.html')"><i class="fa fa-users"></i> Employee Management</li>
+    <li onclick="openPage('party_management.html')"><i class="fa fa-user-group"></i> Party Management</li>
+    <li onclick="openPage('receipt_management.html')"><i class="fa fa-wallet"></i> Receipt Management</li>
+    <li onclick="openPage('expense_management.html')"><i class="fa fa-money-bill-wave"></i> Expense Management</li>
+    <li onclick="openPage('employee_wallet.html')"><i class="fa fa-briefcase"></i> Employee Wallet</li>
+    <li onclick="openPage('dispatch_management.html')"><i class="fa fa-truck"></i> Dispatch Management</li>
+    <li onclick="openPage('stock_management.html')"><i class="fa fa-cubes"></i> Stock Management</li>
+    <li onclick="openPage('production_management.html')"><i class="fa fa-industry"></i> Production</li>
+    <li onclick="openPage('dchallan_management.html')"><i class="fa fa-file-lines"></i> D Challan</li>
+    <li onclick="openPage('reports.html')"><i class="fa fa-chart-column"></i> Reports</li>
+    <li class="active" onclick="openPage('settings.html')"><i class="fa fa-gear"></i> Settings</li>
+    <li onclick="logout()"><i class="fa fa-right-from-bracket"></i> Logout</li>
+  </ul>
+</div>
+
+<!-- MAIN AREA -->
+<div class="main">
+
+  <div class="page-title">
+    <h2><i class="fa fa-gear" style="color:#ffc107;"></i> System Preferences & Configuration</h2>
+  </div>
+
+  <div class="settings-grid">
+
+    <!-- COMPANY PROFILE -->
+    <div class="card-box">
+      <h3><i class="fa fa-building" style="color:#0b1f3a;"></i> Firm / Profile Details</h3>
+      <form id="firmForm" onsubmit="saveFirmDetails(event)">
+        <div class="form-group">
+          <label>Company Name</label>
+          <input type="text" id="firmName" value="CHAUDHARY TILES & PAVERS" required>
+        </div>
+        <div class="form-group">
+          <label>Contact Phone</label>
+          <input type="text" id="firmPhone" value="+91 9876543210" required>
+        </div>
+        <div class="form-group">
+          <label>GSTIN Number (Optional)</label>
+          <input type="text" id="firmGst" value="10AAAAA0000A1Z5">
+        </div>
+        <div class="form-group">
+          <label>Registered Address</label>
+          <textarea id="firmAddress" rows="3">Sipara & Nandlal Chhapra Plant, Patna, Bihar</textarea>
+        </div>
+        <button type="submit" class="btn-save"><i class="fa fa-floppy-disk"></i> Save Firm Info</button>
+      </form>
+    </div>
+
+    <!-- PLANT LOCATIONS -->
+    <div class="card-box">
+      <h3><i class="fa fa-industry" style="color:#d97706;"></i> Manufacturing Plants</h3>
+      <div class="form-group">
+        <label>Primary Manufacturing Unit</label>
+        <input type="text" value="Sipara Plant, Patna" readonly style="background:#f8fafc; font-weight:600;">
+      </div>
+      <div class="form-group">
+        <label>Secondary Manufacturing Unit</label>
+        <input type="text" value="Nandlal Chhapra Plant, Patna" readonly style="background:#f8fafc; font-weight:600;">
+      </div>
+      <p style="font-size:12px; color:#666; margin-top:10px;">
+        <i class="fa fa-info-circle"></i> Both units are actively integrated with Stock, Production, and Dispatch workflows.
+      </p>
+    </div>
+
+    <!-- SYSTEM DATA BACKUP & RESTORE -->
+    <div class="card-box">
+      <h3><i class="fa fa-database" style="color:#059669;"></i> System Backup & Maintenance</h3>
+      <p style="font-size:12px; color:#555; margin-bottom:15px;">
+        Download complete system database (Parties, Employees, Stock, Transactions) or reset system state.
+      </p>
+      
+      <button class="btn-backup" onclick="downloadJSONBackup()"><i class="fa fa-download"></i> Download Full Database Backup</button>
+      
+      <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+        <p style="font-size:12px; color:#dc3545; font-weight:600; margin-bottom:8px;">Danger Zone</p>
+        <button class="btn-reset" onclick="resetSystemData()"><i class="fa fa-trash-can"></i> Reset All Demo Data</button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- BOTTOM MOBILE NAVIGATION -->
+<div class="bottomnav">
+  <i class="fa fa-house" onclick="openPage('super_admin_dashboard.html')"></i>
+  <i class="fa fa-users" onclick="openPage('employee_management.html')"></i>
+  <i class="fa fa-wallet" onclick="openPage('receipt_management.html')"></i>
+  <i class="fa fa-chart-column" onclick="openPage('reports.html')"></i>
+  <i class="fa fa-gear" onclick="openPage('settings.html')"></i>
+</div>
+
+<script>
+let activeUser = null;
+
+function checkUserSession() {
+  const session = localStorage.getItem('ct_active_user');
+  if(!session) {
+    window.location.href = "login.html";
+    return;
+  }
+  activeUser = JSON.parse(session);
+
+  const firmData = JSON.parse(localStorage.getItem('ct_firm_info') || '{}');
+  if(firmData.name) {
+    document.getElementById('firmName').value = firmData.name;
+    document.getElementById('firmPhone').value = firmData.phone;
+    document.getElementById('firmGst').value = firmData.gst;
+    document.getElementById('firmAddress').value = firmData.address;
+  }
+}
+
+function saveFirmDetails(e) {
+  e.preventDefault();
+  const info = {
+    name: document.getElementById('firmName').value,
+    phone: document.getElementById('firmPhone').value,
+    gst: document.getElementById('firmGst').value,
+    address: document.getElementById('firmAddress').value
+  };
+
+  localStorage.setItem('ct_firm_info', JSON.stringify(info));
+  alert("Firm profile updated successfully!");
+}
+
+function downloadJSONBackup() {
+  const fullBackup = {
+    users: JSON.parse(localStorage.getItem('ct_users') || '[]'),
+    employees: JSON.parse(localStorage.getItem('ct_employees') || '[]'),
+    parties: JSON.parse(localStorage.getItem('ct_parties') || '[]'),
+    receipts: JSON.parse(localStorage.getItem('ct_receipts') || '[]'),
+    expenses: JSON.parse(localStorage.getItem('ct_expenses') || '[]'),
+    stock: JSON.parse(localStorage.getItem('ct_stock') || '[]'),
+    production: JSON.parse(localStorage.getItem('ct_production') || '[]'),
+    dispatches: JSON.parse(localStorage.getItem('ct_dispatches') || '[]'),
+    challans: JSON.parse(localStorage.getItem('ct_challans') || '[]'),
+    firm: JSON.parse(localStorage.getItem('ct_firm_info') || '{}'),
+    exportDate: new Date().toISOString()
+  };
+
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullBackup, null, 2));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", `CT_Full_System_Backup_${new Date().toISOString().split('T')[0]}.json`);
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+}
+
+function resetSystemData() {
+  if(confirm("DHYAN DEIN: Kya aap pura local data delete karke default state par reset karna chahte hain?")) {
+    localStorage.clear();
+    alert("System Data Reset Done!");
+    window.location.href = "login.html";
+  }
+}
+
+function openPage(page){ window.location.href = page; }
+function logout(){
+  if(confirm("Logout from CT Management Portal?")){
+    localStorage.removeItem('ct_active_user');
+    window.location.href = "login.html";
+  }
+}
+
+window.onload = checkUserSession;
+</script>
+</body>
+</html>
