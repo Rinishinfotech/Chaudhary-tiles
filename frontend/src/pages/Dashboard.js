@@ -17,7 +17,7 @@ const MODULES = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [summary, setSummary] = useState({ todayReceipt: 0, todayExpense: 0, dispatchCount: 0, pendingCount: 0 });
   const [approvals, setApprovals] = useState([]);
   const [showPending, setShowPending] = useState(false);
@@ -49,10 +49,12 @@ export default function Dashboard() {
         <div className="box"><h4>Today's Receipt</h4><h2>{inr(summary.todayReceipt)}</h2></div>
         <div className="box"><h4>Today's Expense</h4><h2>{inr(summary.todayExpense)}</h2></div>
         <div className="box"><h4>Dispatch Count</h4><h2>{summary.dispatchCount}</h2></div>
-        <div className="box clickable" onClick={() => setShowPending(true)}>
-          <h4>Pending Approval <i className="fa fa-arrow-up-right-from-square" style={{ fontSize: 12, color: '#ffc107' }}></i></h4>
-          <h2>{approvals.length}</h2>
-        </div>
+        {isAdmin && (
+          <div className="box clickable" onClick={() => setShowPending(true)}>
+            <h4>Pending Approval <i className="fa fa-arrow-up-right-from-square" style={{ fontSize: 12, color: '#ffc107' }}></i></h4>
+            <h2>{approvals.length}</h2>
+          </div>
+        )}
       </div>
 
       <div className="modules">
