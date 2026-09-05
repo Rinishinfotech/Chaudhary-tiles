@@ -79,15 +79,6 @@ export default function Login() {
             <span>Login To Portal</span><i className="fa fa-arrow-right"></i>
           </button>
         </form>
-
-        <div style={{ marginTop: 25, borderTop: '1px solid #eee', paddingTop: 15 }}>
-          <h4 style={{ fontSize: 12, color: '#666', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Quick Select Profile (Demo Access):</h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {team.map((u, i) => (
-              <span key={u.id} onClick={() => quickSelect(i)} className="login-chip" style={{ background: '#f2f5fa', border: '1px solid #d1d9e6', padding: '6px 10px', borderRadius: 20, fontSize: 11, fontWeight: 500, cursor: 'pointer', color: '#0b1f3a' }}>{u.role} ({u.name.split(' ').slice(-1)[0]})</span>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );
