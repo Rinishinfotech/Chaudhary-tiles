@@ -15,6 +15,7 @@ export default function ReceiptManagement() {
   const [query, setQuery] = useState('');
   const [timePeriod, setTimePeriod] = useState('all');
   const [route, setRoute] = useState('all');
+  const [sortOrder, setSortOrder] = useState('new');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [modal, setModal] = useState(false);
@@ -87,6 +88,11 @@ export default function ReceiptManagement() {
     else if (timePeriod === 'custom' && fromDate && toDate) mt = r.date >= fromDate && r.date <= toDate;
     return mq && mr && mt;
   });
+  filtered.sort((a, b) => {
+    const da = new Date(a.date).getTime(), db = new Date(b.date).getTime();
+    return sortOrder === 'new' ? db - da : da - db;
+  });
+  const periodTotal = filtered.reduce((s, r) => s + Number(r.amount || 0), 0);
   const visibleParties = parties.filter((p) => p.name.toLowerCase().includes(partySearch.toLowerCase()));
 
   return (
@@ -111,6 +117,13 @@ export default function ReceiptManagement() {
             <option value="all">All Routes</option><option value="Employee">Employee Wallet</option><option value="Supplier / Creditor / Contractor">Supplier / Contractor</option><option value="Direct Expense">Direct Expenses</option>
           </select>
         </div>
+        <div className="filter-group"><label><i className="fa fa-arrow-down-wide-short" style={{ color: '#0b1f3a' }}></i> Sort By:</label>
+          <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+            <option value="new">Date: New to Old</option>
+            <option value="old">Date: Old to New</option>
+          </select>
+        </div>
+        <div className="summary-badge">Total Received: {inr(periodTotal)}</div>
       </div>
 
       <div className="card-table">
