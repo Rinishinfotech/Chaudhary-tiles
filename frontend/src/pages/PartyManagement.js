@@ -12,6 +12,8 @@ export default function PartyManagement() {
   const [query, setQuery] = useState('');
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState(null);
+  const [imgView, setImgView] = useState(null);
+  const [statusSort, setStatusSort] = useState(null); // null | 'asc' | 'desc'
 
   const load = async () => setParties(await api.getParties());
   useEffect(() => { load(); }, []);
@@ -37,8 +39,16 @@ export default function PartyManagement() {
   const del = async (id) => { if (window.confirm('Kya aap sach me is party entry ko delete karna chahte hain?')) { await api.deleteParty(id); load(); } };
 
   const q = query.toLowerCase();
+  const CLICK_ORDER = { Completed: 1, Pending: 2, 'Under Working': 3, Cancel: 4 };
   const filtered = parties.filter((p) => (p.name || '').toLowerCase().includes(q) || (p.contact || '').includes(query) || (p.address || '').toLowerCase().includes(q))
-    .sort((a, b) => (STATUS_PRIORITY[a.status] || 99) - (STATUS_PRIORITY[b.status] || 99));
+    .sort((a, b) => {
+      if (statusSort) {
+        const diff = (CLICK_ORDER[a.status] || 99) - (CLICK_ORDER[b.status] || 99);
+        return statusSort === 'asc' ? diff : -diff;
+      }
+      return (STATUS_PRIORITY[a.status] || 99) - (STATUS_PRIORITY[b.status] || 99);
+    });
+  const toggleStatusSort = () => setStatusSort((s) => (s === 'asc' ? 'desc' : 'asc'));
   const totalDue = parties.filter((p) => p.paymentType === 'Due').reduce((s, p) => s + Number(p.amount || 0), 0);
   const totalAdv = parties.filter((p) => p.paymentType === 'Advance').reduce((s, p) => s + Number(p.amount || 0), 0);
 
@@ -57,7 +67,11 @@ export default function PartyManagement() {
         <table>
           <thead><tr>
             <th>S.No</th><th>Date</th><th>Order Img</th><th>Party Name</th><th>Contact</th><th>Site Address</th>
-            <th>Rate / Details</th><th>Site Status</th><th>Payment Balance</th>{isAdmin && <th>Action</th>}
+            <th>Rate / Details</th>
+            <th onClick={toggleStatusSort} style={{ cursor: 'pointer', userSelect: 'none' }} title="Click to sort by status (Completed → Pending → Under Working)">
+              Site Status <i className={`fa ${statusSort === 'asc' ? 'fa-sort-down' : statusSort === 'desc' ? 'fa-sort-up' : 'fa-sort'}`} style={{ color: '#ffc107', marginLeft: 4 }}></i>
+            </th>
+            <th>Payment Balance</th>{isAdmin && <th>Action</th>}
           </tr></thead>
           <tbody>
             {filtered.length === 0 && <tr><td colSpan={isAdmin ? 10 : 9} style={{ textAlign: 'center', padding: 25, color: '#888' }}>No matching party records found.</td></tr>}
@@ -65,7 +79,7 @@ export default function PartyManagement() {
               <tr key={p.id}>
                 <td>{i + 1}</td>
                 <td><small style={{ fontWeight: 600, color: '#444' }}>{fmtDate(p.date)}</small></td>
-                <td>{p.img ? <img src={p.img} className="img-preview" alt="order" onClick={() => window.open(p.img)} /> : <span style={{ fontSize: 11, color: '#aaa' }}>No Img</span>}</td>
+                <td>{p.img ? <img src={p.img} className="img-preview" alt="order" onClick={() => setImgView(p.img)} /> : <span style={{ fontSize: 11, color: '#aaa' }}>No Img</span>}</td>
                 <td><strong>{p.name}</strong></td>
                 <td>{p.contact}</td>
                 <td>{p.address}</td>
@@ -99,10 +113,25 @@ export default function PartyManagement() {
                 <div className="form-group"><label>Site Status *</label><select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}><option>Under Working</option><option>Completed</option><option>Pending</option><option>Cancel</option></select></div>
                 <div className="form-group"><label>Payment Type *</label><select value={form.paymentType} onChange={(e) => setForm({ ...form, paymentType: e.target.value })}><option value="Due">Due Amount</option><option value="Advance">Advance Received</option></select></div>
                 <div className="form-group full"><label>Amount (Rs) *</label><input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} min="0" required /></div>
-                <div className="form-group full"><label>Order Attachment / Image</label><input type="file" accept="image/*" onChange={onImg} /></div>
+                <div className="form-group full"><label>Order Attachment / Image</label><input type="file" accept="image/*" onChange={onImg} />
+                  {form.img && <img src={form.img} alt="preview" style={{ marginTop: 8, maxWidth: 140, maxHeight: 140, borderRadius: 8, border: '1px solid #cbd5e1', cursor: 'pointer' }} onClick={() => setImgView(form.img)} />}
+                </div>
               </div>
               <button type="submit" className="btn-submit">Submit & Save Party</button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {imgView && (
+        <div className="modal-overlay" onClick={() => setImgView(null)}>
+          <div className="modal" style={{ maxWidth: 620, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3><i className="fa fa-image" style={{ color: '#ffc107' }}></i> Order Image Preview</h3>
+              <i className="fa fa-xmark modal-close" onClick={() => setImgView(null)}></i>
+            </div>
+            <img src={imgView} alt="order full" style={{ maxWidth: '100%', maxHeight: '65vh', borderRadius: 8, border: '1px solid #cbd5e1' }} />
+            <a href={imgView} download="party_order_image.png" className="btn-submit" style={{ display: 'inline-block', textDecoration: 'none', marginTop: 15 }}><i className="fa fa-download"></i> Download Image</a>
           </div>
         </div>
       )}
