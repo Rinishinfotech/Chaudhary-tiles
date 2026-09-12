@@ -64,7 +64,7 @@ export const api = {
   getFirm: () => client.get('/firm').then(r => r.data),
   updateFirm: (d) => client.put('/firm', d).then(r => r.data),
   dashboardSummary: () => client.get('/dashboard/summary').then(r => r.data),
-  reports: () => client.get('/reports').then(r => r.data),
+  reports: (fromDate, toDate) => client.get('/reports', { params: { from_date: fromDate || undefined, to_date: toDate || undefined } }).then(r => r.data),
   backup: () => client.get('/backup').then(r => r.data),
   resetSystem: () => client.post('/system/reset').then(r => r.data),
 };

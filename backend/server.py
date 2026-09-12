@@ -711,11 +711,26 @@ async def dashboard_summary():
 
 # ---------------- REPORTS ----------------
 @api.get("/reports")
-async def reports():
+async def reports(from_date: Optional[str] = None, to_date: Optional[str] = None):
     receipts = await db.receipts.find().to_list(5000)
     expenses = await db.expenses.find().to_list(5000)
     parties = await db.parties.find().to_list(2000)
     production = await db.production.find().to_list(5000)
+    challans = await db.challans.find().to_list(5000)
+
+    def in_range(d):
+        if not d:
+            return True
+        if from_date and d < from_date:
+            return False
+        if to_date and d > to_date:
+            return False
+        return True
+
+    receipts = [r for r in receipts if in_range(r.get("date"))]
+    expenses = [e for e in expenses if in_range(e.get("date"))]
+    production = [p for p in production if in_range(p.get("date"))]
+    challans = [c for c in challans if in_range(c.get("date"))]
 
     total_rec = sum(float(r.get("amount", 0)) for r in receipts)
     total_exp = sum(float(e.get("amount", 0)) for e in expenses)
@@ -724,6 +739,10 @@ async def reports():
     for pr in production:
         for it in pr.get("items", []):
             total_prod += it.get("qty", 0)
+    total_dispatch = 0
+    for c in challans:
+        for it in c.get("items", []):
+            total_dispatch += it.get("qty", 0)
 
     top_dues = sorted([p for p in parties if (p.get("dues", 0) or 0) > 0], key=lambda x: x.get("dues", 0), reverse=True)[:5]
     top_dues = [{"name": p.get("name"), "contact": p.get("contact"), "amount": p.get("amount", 0), "dues": p.get("dues", 0)} for p in top_dues]
@@ -732,6 +751,7 @@ async def reports():
     return {
         "totalReceipts": total_rec, "totalExpenses": total_exp,
         "totalDues": total_due, "totalProduction": total_prod,
+        "totalDispatch": total_dispatch,
         "topDues": top_dues, "recentExpenses": recent_exp,
     }
 
