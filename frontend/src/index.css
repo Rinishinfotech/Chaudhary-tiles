@@ -266,6 +266,15 @@ th { background: #f8fafc; color: #0b1f3a; font-weight: 600; text-transform: uppe
 .notif-dropdown .notif-item { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-bottom: 1px solid #f1f5f9; background: white; border-radius: 0; margin: 0; }
 .notif-empty { text-align: center; padding: 20px; color: #94a3b8; font-size: 13px; }
 
+/* HEADER SEARCH RESULTS */
+.search-results { position: absolute; top: 46px; left: 0; right: 0; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; z-index: 1001; max-height: 380px; overflow-y: auto; }
+.search-item { display: flex; gap: 12px; align-items: center; padding: 11px 14px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background .15s; }
+.search-item:last-child { border-bottom: none; }
+.search-item:hover { background: #f8fafc; }
+.search-item i { color: #0b1f3a; width: 20px; text-align: center; font-size: 15px; }
+.search-item h4 { font-size: 13px; color: #0b1f3a; font-weight: 600; }
+.search-item p { font-size: 11px; color: #64748b; }
+
 /* MOBILE NAV */
 .bottomnav { display: none; }
 @media(max-width:900px) {

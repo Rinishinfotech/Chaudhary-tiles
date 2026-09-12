@@ -294,3 +294,40 @@ agent_communication:
       message: "Full backend implemented for Chaudhary Tiles ERP. Please test all API endpoints. Data is seeded on startup. Key interconnected flows to verify: (1) Receipt to Employee credits wallet (check via /api/wallet/summary), Receipt to Supplier/Direct auto-creates an expense and reduces party dues. (2) Production adds produced pcs to stock and subtracts cement bags; editing reverts old then applies new; deleting reverts. (3) D-Challan deducts plant stock; edit reverts+reapplies; delete restores. (4) Wallet summary computes per-employee balances. Use default team ids from GET /api/team; login pin is 1234."
     - agent: "testing"
       message: "✅ BACKEND TESTING COMPLETE - ALL CRITICAL FLOWS WORKING. Executed comprehensive test suite covering all 10 backend task areas. Results: 44/45 tests passed. The only 'failure' is a test design issue (approval count check after deletion in same test run). All API endpoints working correctly with proper status codes, all side-effects verified (wallet credits, expense sync, dues reduction, stock adjustments, cement consumption, notifications). Production and D-Challan revert logic working perfectly. Ready for user acceptance."
+
+## BUG FIX VERIFICATION REQUEST (Layout - search bar & bottom-nav wallet link)
+frontend:
+  - task: "Header global search bar functional"
+    implemented: true
+    working: true
+    file: "frontend/src/components/Layout.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Header search now performs global search across parties, employees, receipts, stock, dispatches, challans, expenses. Typing >=2 chars shows a results dropdown; clicking a result navigates to that module. Also still calls page-level onSearch for in-table filtering."
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Comprehensive testing completed. (1) Global search: Typed 'monu' on Dashboard, results dropdown appeared with 4 results, each with icon, label, and subtitle in correct format (e.g. 'Monu Kumar' with 'Employee • Admin'). Clicking first result successfully navigated to /employees page. (2) In-page filtering: On Employee Management page, typing 'monu' correctly filtered table from 6 rows to 1 row containing 'monu'. Both global search navigation and in-page filtering working perfectly."
+  - task: "Mobile bottom-nav wallet icon links to Employee Wallet"
+    implemented: true
+    working: true
+    file: "frontend/src/components/Layout.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Bottom-nav fa-wallet icon now navigates to /wallet (Employee Wallet) instead of /receipts."
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Mobile viewport testing (400x800) confirmed bottom navigation bar is visible. Clicked wallet icon (fa-wallet) and successfully navigated to /wallet page. Page displays correct title 'Employee Wallet Balances & Combined Passbook'. Confirmed NOT navigating to /receipts page. Fix working correctly."
+
+agent_communication:
+    - agent: "main"
+      message: "Please verify TWO frontend fixes only. Login: open the app, click a profile in the dropdown (any team member) and login with PIN 1234 (no quick-select chips anymore). (1) HEADER SEARCH: On the Dashboard (or any page), type at least 2 characters (e.g. 'monu' or 'suresh' or 'cement') in the top search bar and confirm a dropdown of matching results appears; clicking a result should navigate to the correct module page. Also confirm typing on a listing page (e.g. Employee Management) still filters the table. (2) BOTTOM-NAV WALLET: resize to mobile width (<=900px) so the bottom navigation bar appears, click the wallet icon and confirm it navigates to the Employee Wallet page (/wallet), NOT Receipts. Report pass/fail for each."
+    - agent: "testing"
+      message: "✅ TESTING COMPLETE - BOTH FIXES VERIFIED WORKING. FIX 1 (Header Global Search): Search dropdown appears with properly formatted results (icon + label + subtitle with bullet separator), clicking results navigates to correct module pages, in-page filtering on Employee Management works correctly. FIX 2 (Mobile Bottom-Nav Wallet): Wallet icon in bottom navigation correctly navigates to /wallet (Employee Wallet page), NOT /receipts. All test scenarios passed. No issues found."
