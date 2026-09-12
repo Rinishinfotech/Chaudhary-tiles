@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import { api, inr } from '../api';
+import { api, inr, fmtDate } from '../api';
 
 export default function Reports() {
   const [data, setData] = useState(null);
@@ -37,7 +37,7 @@ export default function Reports() {
         <div className="filter-group"><label>To:</label><input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} /></div>
         <button className="btn-action" onClick={applyRange}><i className="fa fa-filter"></i> Apply Range</button>
         <button className="btn-filter-reset" onClick={resetRange}><i className="fa fa-rotate"></i> Reset</button>
-        <div className="summary-badge">{fromDate || toDate ? `${fromDate || 'Start'} → ${toDate || 'Today'}` : 'All Time Data'}</div>
+        <div className="summary-badge">{fromDate || toDate ? `${fromDate ? fmtDate(fromDate) : 'Start'} → ${toDate ? fmtDate(toDate) : 'Today'}` : 'All Time Data'}</div>
       </div>
 
       <div className="report-grid">

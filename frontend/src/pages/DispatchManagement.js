@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
-import { api, todayStr } from '../api';
+import { api, todayStr, fmtDate } from '../api';
 
 export default function DispatchManagement() {
   const { isAdmin } = useAuth();
@@ -65,7 +65,7 @@ export default function DispatchManagement() {
           <tbody>
             {filtered.map((d) => (
               <tr key={d.id}>
-                <td><strong>{d.id.split('-').slice(0, 2).join('-')}</strong><br /><small>{d.date}</small></td>
+                <td><strong>{d.id.split('-').slice(0, 2).join('-')}</strong><br /><small>{fmtDate(d.date)}</small></td>
                 <td><strong>{d.party}</strong><br /><small style={{ color: '#666' }}>{d.plant}</small></td>
                 <td>{d.vehicle}<br /><small style={{ color: '#666' }}>{d.driver}</small></td>
                 <td>{d.items.map((it, i) => <small key={i}>&bull; {it.pattern} ({it.color}): <strong>{it.qty} Pcs</strong><br /></small>)}</td>
@@ -148,7 +148,7 @@ export default function DispatchManagement() {
               {searchResults.length === 0 && <p style={{ textAlign: 'center', color: '#888', fontSize: 13, padding: 20 }}>No D-Challan documents found.</p>}
               {searchResults.map((r) => (
                 <div key={r.id} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: 12, marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div><strong style={{ color: '#0b1f3a', fontSize: 14 }}>{r.party}</strong><p style={{ fontSize: 12, color: '#666' }}>Challan: <strong>{r.challanNo}</strong> | Date: {r.date}</p></div>
+                  <div><strong style={{ color: '#0b1f3a', fontSize: 14 }}>{r.party}</strong><p style={{ fontSize: 12, color: '#666' }}>Challan: <strong>{r.challanNo}</strong> | Date: {fmtDate(r.date)}</p></div>
                   <button className="action-btn" onClick={() => { setView(r); setSearch(null); }}><i className="fa fa-eye"></i> View / Download</button>
                 </div>
               ))}

@@ -116,7 +116,7 @@ export default function EmployeeWallet() {
           <tbody>
             {filtered.map((p, i) => (
               <tr key={i}>
-                <td>{i + 1}</td><td>{p.date}</td><td><strong>{p.empName}</strong></td>
+                <td>{i + 1}</td><td>{fmtDate(p.date)}</td><td><strong>{p.empName}</strong></td>
                 <td><span className={p.type === 'Credit' ? 'type-credit' : 'type-debit'}>{p.type}</span></td>
                 <td>{p.particulars}</td>
                 <td><strong className={p.type === 'Credit' ? 'type-credit' : 'type-debit'}>{inr(p.amount)}</strong></td>

@@ -105,7 +105,7 @@ export default function ExpenseManagement() {
           <tbody>
             {filtered.map((e, i) => (
               <tr key={e.id}>
-                <td>{i + 1}</td><td>{e.date}</td><td><strong>{e.spentBy}</strong></td>
+                <td>{i + 1}</td><td>{fmtDate(e.date)}</td><td><strong>{e.spentBy}</strong></td>
                 <td><span className="cat-badge">{e.category === 'Wallet Fund Transfer' ? `Transfer to: ${e.paidTo || '-'}` : e.category}</span></td>
                 <td><strong style={{ color: '#dc3545' }}>{inr(e.amount)}</strong></td><td>{e.remarks || '-'}</td>
               </tr>

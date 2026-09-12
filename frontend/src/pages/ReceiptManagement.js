@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
-import { api, inr, todayStr, printDocument } from '../api';
+import { api, inr, todayStr, printDocument, fmtDate } from '../api';
 
 const modeClass = (m) => m === 'Cash' ? 'mode-cash' : (m || '').includes('Cheque') ? 'mode-cheque' : 'mode-upi';
 const CONTRACTORS = ['Sipara Contractor Ledger', 'Nandlal Chhapra Contractor Ledger', 'Cement / Raw Material Supplier', 'Transport / Freight Contractor'];
@@ -41,7 +41,7 @@ export default function ReceiptManagement() {
       </div>
       <div class="meta">
         <div><span>Voucher No</span>${r.srNo}</div>
-        <div><span>Date</span>${r.date}</div>
+        <div><span>Date</span>${fmtDate(r.date)}</div>
         <div><span>Received From (Party)</span>${r.party}</div>
         <div><span>Payment Mode</span>${r.mode}</div>
         <div><span>Routed To</span>${r.receiver}</div>
@@ -132,7 +132,7 @@ export default function ReceiptManagement() {
           <tbody>
             {filtered.map((r) => (
               <tr key={r.id}>
-                <td><strong>{r.srNo}</strong></td><td>{r.date}</td><td><strong>{r.party}</strong></td>
+                <td><strong>{r.srNo}</strong></td><td>{fmtDate(r.date)}</td><td><strong>{r.party}</strong></td>
                 <td><strong style={{ color: '#059669' }}>{inr(r.amount)}</strong></td>
                 <td><span className={`mode-badge ${modeClass(r.mode)}`}>{r.mode}</span></td>
                 <td>{r.receiver}</td><td><small className="cat-badge">{r.receiverType}</small></td><td>{r.remarks || '-'}</td>
