@@ -81,6 +81,11 @@ export default function DChallanManagement() {
     if (gq && !ss.includes(gq) && !hi) return false;
     return true;
   });
+  visible.sort((a, b) => {
+    const da = new Date(a.date).getTime(), db = new Date(b.date).getTime();
+    if (db !== da) return db - da;
+    return 0;
+  });
   visible.forEach((ch) => { totalTrips++; if (ch.vehicle) vehicles.add(ch.vehicle.trim().toUpperCase()); (ch.items || []).forEach((it) => { const ok = (!flt.item || it.itemName.toLowerCase().includes(flt.item.toLowerCase())) && (flt.color === 'ALL' || it.color === flt.color); if (ok) totalPcs += (it.qty || 0); }); });
 
   return (
