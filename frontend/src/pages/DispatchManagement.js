@@ -55,7 +55,7 @@ export default function DispatchManagement() {
         <h2><i className="fa fa-truck" style={{ color: '#ffc107' }}></i> Tile Dispatch & D-Challan Portal</h2>
         <div className="btn-group">
           <button className="btn-add btn-secondary" onClick={() => { setSearch(true); setSearchQ(''); }}><i className="fa fa-file-invoice"></i> Search Party / Challan Photo</button>
-          {isAdmin && <button className="btn-add" onClick={openAdd}><i className="fa fa-plus"></i> Create Loading Order</button>}
+          <button className="btn-add" onClick={openAdd}><i className="fa fa-plus"></i> Create Loading Order</button>
         </div>
       </div>
 

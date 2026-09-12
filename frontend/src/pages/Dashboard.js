@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
 import { api, inr } from '../api';
+import { canAccess } from '../permissions';
 
 const MODULES = [
   { path: '/employees', icon: 'fa-users', label: 'Employee' },
@@ -58,7 +59,7 @@ export default function Dashboard() {
       </div>
 
       <div className="modules">
-        {MODULES.map((m) => (
+        {MODULES.filter((m) => canAccess(user, m.path)).map((m) => (
           <div className="module" key={m.path} onClick={() => navigate(m.path)}>
             <i className={`fa ${m.icon}`}></i>
             <h3>{m.label}</h3>

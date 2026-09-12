@@ -331,3 +331,43 @@ agent_communication:
       message: "Please verify TWO frontend fixes only. Login: open the app, click a profile in the dropdown (any team member) and login with PIN 1234 (no quick-select chips anymore). (1) HEADER SEARCH: On the Dashboard (or any page), type at least 2 characters (e.g. 'monu' or 'suresh' or 'cement') in the top search bar and confirm a dropdown of matching results appears; clicking a result should navigate to the correct module page. Also confirm typing on a listing page (e.g. Employee Management) still filters the table. (2) BOTTOM-NAV WALLET: resize to mobile width (<=900px) so the bottom navigation bar appears, click the wallet icon and confirm it navigates to the Employee Wallet page (/wallet), NOT Receipts. Report pass/fail for each."
     - agent: "testing"
       message: "✅ TESTING COMPLETE - BOTH FIXES VERIFIED WORKING. FIX 1 (Header Global Search): Search dropdown appears with properly formatted results (icon + label + subtitle with bullet separator), clicking results navigates to correct module pages, in-page filtering on Employee Management works correctly. FIX 2 (Mobile Bottom-Nav Wallet): Wallet icon in bottom navigation correctly navigates to /wallet (Employee Wallet page), NOT /receipts. All test scenarios passed. No issues found."
+
+## BUG FIX VERIFICATION - Granular permission enforcement
+frontend:
+  - task: "Granular module access checklist enforcement (employees see only ticked modules)"
+    implemented: true
+    working: true
+    file: "frontend/src/permissions.js, Layout.js, Dashboard.js, App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Added permissions.js with canAccess(user,path). Sidebar NAV, Dashboard module grid, and mobile bottom-nav now filter by the employee's ticked permissions. App.js route guard redirects unauthorized direct-URL access to /dashboard. Super Admin/Admin see everything. /employees, /settings, /wallet are admin-only. /parties,/receipts,/expenses,/dispatch,/stock,/production,/dchallan,/reports require the matching ticked permission."
+        - working: true
+          agent: "testing"
+          comment: "✅ ALL TESTS PASSED. TEST A.1 (Super Admin): Verified all 13 sidebar items (12 modules + Logout) and all 8 dashboard module cards visible. TEST A.2 (Jitendra Kumar - Optivision): Verified sidebar shows ONLY Dashboard, Dispatch Management, Stock Management, Production, D Challan, Logout (6 items). Dashboard shows ONLY Stock, Dispatch, Production, D Challan (4 cards). All forbidden modules correctly hidden (Employee, Party, Receipt, Expense, Employee Wallet, Reports, Settings). TEST A.3 (Route Guard): Verified unauthorized routes (/reports, /parties, /employees) correctly redirect to /dashboard when accessed by Jitendra. TEST A.4 (Mani Bhushan - Viewer): Verified sidebar shows ONLY Dashboard, Party Management, Stock Management, Reports, Logout (5 items). Dashboard shows ONLY Party, Stock (2 cards). All forbidden modules correctly hidden. NOTE: Initial test found stale database data (Mani Bhushan had dispatch=true instead of false). System reset fixed the issue. All permission filtering working correctly."
+
+## BUG FIX - Dispatch "Create Loading Order" visible to all dispatch-permitted employees
+frontend:
+  - task: "Create Loading Order button visible to all employees with dispatch access"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/DispatchManagement.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Removed isAdmin gate on the 'Create Loading Order' button. Now any user who can access the Dispatch page (has dispatch permission) sees both 'Search Party / Challan Photo' and 'Create Loading Order' buttons."
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED. Logged in as Jitendra Kumar (Optivision, non-admin with dispatch permission). Navigated to Dispatch Management page. Verified BOTH buttons are visible: 'Search Party / Challan Photo' AND 'Create Loading Order'. Clicked 'Create Loading Order' button and verified the create modal opened successfully with title 'Create Loading & Dispatch Order'. All form fields present and functional."
+
+agent_communication:
+    - agent: "main"
+      message: "Verify granular permission enforcement. STEP 1 (admin baseline): login as 'Mr Manoj Kumar Chaudhary' (Super Admin) via dropdown + PIN 1234; confirm ALL modules visible in sidebar and dashboard grid. STEP 2 (restricted role): logout, then login as 'Jitendra Kumar' (Optivision) whose ticked permissions are dispatch, production, stock, dchallan (party/receipt/expense/reports = OFF). Confirm the SIDEBAR shows only: Dashboard, Dispatch Management, Stock Management, Production, D Challan (NOT Party, Receipt, Expense, Reports, Employee Wallet, Employee Management, Settings). Confirm the DASHBOARD MODULE GRID shows only Stock, Dispatch, Production, D Challan (NOT Employee/Party/Receipt/Expense). STEP 3 (route guard): while logged in as Jitendra, manually navigate the browser URL to /reports (or /parties) and confirm it redirects back to /dashboard instead of showing the page. STEP 4: login as 'Mr Mani Bhushan Chaudhary' (Viewer, ticked: stock, party, reports) and confirm sidebar shows Dashboard, Party, Stock, Reports only. Report pass/fail for each step."
+    - agent: "testing"
+      message: "✅ COMPREHENSIVE TESTING COMPLETE - ALL TESTS PASSED. Executed full test suite for granular permissions and dispatch button visibility. TEST A (Granular Permissions): All 4 sub-tests passed - Super Admin sees all modules, Jitendra Kumar (Optivision) sees only permitted modules (dispatch, production, stock, dchallan), route guard correctly redirects unauthorized access, Mani Bhushan (Viewer) sees only permitted modules (party, stock, reports). TEST B (Dispatch Button): Passed - non-admin user with dispatch permission can see and use 'Create Loading Order' button. ISSUE RESOLVED: Found and fixed stale database data via system reset. All permission filtering working correctly across sidebar, dashboard module grid, and route guards."

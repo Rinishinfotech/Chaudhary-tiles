@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api';
+import { canAccess } from '../permissions';
 
 const NAV = [
   { path: '/dashboard', icon: 'fa-house', label: 'Dashboard' },
@@ -21,7 +22,7 @@ const NAV = [
 export default function Layout({ children, searchPlaceholder = 'Search...', onSearch }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout, isAdmin } = useAuth();
+  const { logout, isAdmin, user } = useAuth();
   const [notifs, setNotifs] = useState([]);
   const [showNotif, setShowNotif] = useState(false);
   const [term, setTerm] = useState('');
@@ -130,7 +131,7 @@ export default function Layout({ children, searchPlaceholder = 'Search...', onSe
 
       <div className="ct-sidebar">
         <ul>
-          {NAV.filter((n) => n.path !== '/settings' || isAdmin).map((n) => (
+          {NAV.filter((n) => canAccess(user, n.path)).map((n) => (
             <li key={n.path} className={location.pathname === n.path ? 'active' : ''} onClick={() => navigate(n.path)}>
               <i className={`fa ${n.icon}`}></i> {n.label}
             </li>
@@ -143,10 +144,10 @@ export default function Layout({ children, searchPlaceholder = 'Search...', onSe
 
       <div className="bottomnav">
         <i className="fa fa-house" onClick={() => navigate('/dashboard')}></i>
-        <i className="fa fa-users" onClick={() => navigate('/employees')}></i>
-        <i className="fa fa-wallet" onClick={() => navigate('/wallet')}></i>
-        <i className="fa fa-chart-column" onClick={() => navigate('/reports')}></i>
-        {isAdmin && <i className="fa fa-gear" onClick={() => navigate('/settings')}></i>}
+        {canAccess(user, '/employees') && <i className="fa fa-users" onClick={() => navigate('/employees')}></i>}
+        {canAccess(user, '/wallet') && <i className="fa fa-wallet" onClick={() => navigate('/wallet')}></i>}
+        {canAccess(user, '/reports') && <i className="fa fa-chart-column" onClick={() => navigate('/reports')}></i>}
+        {canAccess(user, '/settings') && <i className="fa fa-gear" onClick={() => navigate('/settings')}></i>}
       </div>
     </div>
   );
