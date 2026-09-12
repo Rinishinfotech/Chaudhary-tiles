@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
-import { api, inr, todayStr } from '../api';
+import { api, inr, todayStr, printDocument, fmtDate } from '../api';
 
 export default function ExpenseManagement() {
   const { user, isAdmin } = useAuth();
@@ -11,6 +11,7 @@ export default function ExpenseManagement() {
   const [query, setQuery] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
+  const [sortOrder, setSortOrder] = useState('new');
   const [expModal, setExpModal] = useState(false);
   const [trModal, setTrModal] = useState(false);
   const [catModal, setCatModal] = useState(false);
@@ -51,7 +52,27 @@ export default function ExpenseManagement() {
     let md = true; if (fromDate) md = md && e.date >= fromDate; if (toDate) md = md && e.date <= toDate;
     return mq && md;
   });
+  filtered.sort((a, b) => {
+    const da = new Date(a.date).getTime(), db = new Date(b.date).getTime();
+    return sortOrder === 'new' ? db - da : da - db;
+  });
   const total = filtered.reduce((s, e) => s + Number(e.amount || 0), 0);
+
+  const printSheet = () => {
+    const rows = filtered.map((e, i) => `<tr><td>${i + 1}</td><td>${fmtDate(e.date)}</td><td>${e.spentBy}</td><td>${e.category === 'Wallet Fund Transfer' ? 'Transfer to: ' + (e.paidTo || '-') : e.category}</td><td>${inr(e.amount)}</td><td>${e.remarks || '-'}</td></tr>`).join('');
+    const range = (fromDate || toDate) ? `${fromDate ? fmtDate(fromDate) : 'Start'} to ${toDate ? fmtDate(toDate) : 'Today'}` : 'All Dates';
+    const body = `
+      <div class="doc-head">
+        <div><div class="firm-name">Chaudhary Tiles & Pavers</div>
+        <div class="firm-sub">Expense Sheet Report • Period: ${range}</div></div>
+        <div class="doc-title">EXPENSE SHEET</div>
+      </div>
+      <table><thead><tr><th>S.No</th><th>Date</th><th>Spent By / Sender</th><th>Category / Recipient</th><th>Amount</th><th>Remarks</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="6" style="text-align:center">No records</td></tr>'}</tbody></table>
+      <div class="total-row">Total Expense: ${inr(total)}</div>
+      <div class="foot"><div>Generated on ${fmtDate(todayStr())}</div><div class="sign">Authorised Signatory</div></div>`;
+    printDocument('Expense Sheet', body);
+  };
 
   return (
     <Layout searchPlaceholder="Search Expense by Employee, Category or Remarks..." onSearch={setQuery}>
@@ -68,6 +89,13 @@ export default function ExpenseManagement() {
         <div className="filter-group"><label>From:</label><input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} /></div>
         <div className="filter-group"><label>To:</label><input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} /></div>
         <button className="btn-filter-reset" onClick={() => { setFromDate(''); setToDate(''); }}><i className="fa fa-rotate"></i> Reset</button>
+        <div className="filter-group"><label><i className="fa fa-arrow-down-wide-short" style={{ color: '#0b1f3a' }}></i> Sort By:</label>
+          <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+            <option value="new">Date: New to Old</option>
+            <option value="old">Date: Old to New</option>
+          </select>
+        </div>
+        <button className="btn-export" onClick={printSheet}><i className="fa fa-print"></i> Print Sheet</button>
         <div className="summary-badge">Total Expense: {inr(total)}</div>
       </div>
 
