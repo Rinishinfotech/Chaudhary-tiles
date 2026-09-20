@@ -4,9 +4,9 @@
 // otherwise => requires user.permissions[<key>] to be true
 export const PATH_PERM = {
   '/dashboard': null,
+  '/wallet': null,
   '/employees': '__admin__',
   '/settings': '__admin__',
-  '/wallet': '__admin__',
   '/parties': 'party',
   '/receipts': 'receipt',
   '/expenses': 'expense',

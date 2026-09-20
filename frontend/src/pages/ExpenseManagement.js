@@ -30,13 +30,20 @@ export default function ExpenseManagement() {
     setForm({ date: todayStr(), spentBy: isAdmin ? (team[0]?.name || '') : user.name, category: categories[0]?.name || '', amount: '', remarks: '' });
     setExpModal(true);
   };
+  const openEditExp = (exp) => {
+    if (exp.category === 'Wallet Fund Transfer') { alert('Wallet transfers cannot be edited from here. Please delete and re-create if needed.'); return; }
+    setForm({ id: exp.id, date: exp.date, spentBy: exp.spentBy, category: exp.category, amount: exp.amount, remarks: exp.remarks || '', status: exp.status || 'Approved', paidTo: exp.paidTo || '' });
+    setExpModal(true);
+  };
   const openTr = () => { setTr({ fromEmp: isAdmin ? (team[0]?.name || '') : user.name, toEmp: team[1]?.name || '', amount: '', note: '' }); setTrModal(true); };
 
   const saveExp = async (e) => {
     e.preventDefault();
-    await api.addExpense({ date: form.date, spentBy: form.spentBy, category: form.category, amount: Number(form.amount), remarks: form.remarks, status: 'Approved' });
-    setExpModal(false); load(); alert('Expense recorded successfully!');
+    const payload = { date: form.date, spentBy: form.spentBy, category: form.category, amount: Number(form.amount), remarks: form.remarks, status: form.status || 'Approved', paidTo: form.paidTo || '' };
+    if (form.id) { await api.updateExpense(form.id, payload); setExpModal(false); load(); alert('Expense updated successfully!'); }
+    else { await api.addExpense(payload); setExpModal(false); load(); alert('Expense recorded successfully!'); }
   };
+  const delExp = async (id) => { if (window.confirm('Kya aap is expense entry ko delete karna chahte hain?')) { await api.deleteExpense(id); load(); } };
   const saveTr = async (e) => {
     e.preventDefault();
     if (tr.fromEmp === tr.toEmp) { alert('Sender and Receiver cannot be the same person!'); return; }
@@ -101,13 +108,17 @@ export default function ExpenseManagement() {
 
       <div className="card-table">
         <table>
-          <thead><tr><th>S.No</th><th>Date</th><th>Spent By / Sender</th><th>Category / Recipient</th><th>Amount Spent</th><th>Remarks</th></tr></thead>
+          <thead><tr><th>S.No</th><th>Date</th><th>Spent By / Sender</th><th>Category / Recipient</th><th>Amount Spent</th><th>Remarks</th><th>Action</th></tr></thead>
           <tbody>
             {filtered.map((e, i) => (
               <tr key={e.id}>
                 <td>{i + 1}</td><td>{fmtDate(e.date)}</td><td><strong>{e.spentBy}</strong></td>
                 <td><span className="cat-badge">{e.category === 'Wallet Fund Transfer' ? `Transfer to: ${e.paidTo || '-'}` : e.category}</span></td>
                 <td><strong style={{ color: '#dc3545' }}>{inr(e.amount)}</strong></td><td>{e.remarks || '-'}</td>
+                <td>
+                  <button className="action-btn" onClick={() => openEditExp(e)}><i className="fa fa-pen-to-square"></i></button>
+                  <button className="action-btn delete" onClick={() => delExp(e.id)}><i className="fa fa-trash"></i></button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -117,7 +128,7 @@ export default function ExpenseManagement() {
       {expModal && (
         <div className="modal-overlay" onClick={() => setExpModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header"><h3><i className="fa fa-receipt" style={{ color: '#ffc107' }}></i> Record Expense</h3><i className="fa fa-xmark modal-close" onClick={() => setExpModal(false)}></i></div>
+            <div className="modal-header"><h3><i className="fa fa-receipt" style={{ color: '#ffc107' }}></i> {form.id ? 'Edit Expense' : 'Record Expense'}</h3><i className="fa fa-xmark modal-close" onClick={() => setExpModal(false)}></i></div>
             <form onSubmit={saveExp}>
               <div className="form-grid">
                 <div className="form-group"><label>Date</label><input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required disabled={!isAdmin} /></div>
@@ -126,7 +137,7 @@ export default function ExpenseManagement() {
                 <div className="form-group"><label>Amount Spent (Rs)</label><input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required min="1" /></div>
                 <div className="form-group full"><label>Remarks / Detail Note</label><input value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} /></div>
               </div>
-              <button type="submit" className="btn-submit">Deduct & Save Expense</button>
+              <button type="submit" className="btn-submit">{form.id ? 'Update Expense' : 'Deduct & Save Expense'}</button>
             </form>
           </div>
         </div>
