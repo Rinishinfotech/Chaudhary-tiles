@@ -108,17 +108,17 @@ export default function ExpenseManagement() {
 
       <div className="card-table">
         <table>
-          <thead><tr><th>S.No</th><th>Date</th><th>Spent By / Sender</th><th>Category / Recipient</th><th>Amount Spent</th><th>Remarks</th><th>Action</th></tr></thead>
+          <thead><tr><th>S.No</th><th>Date</th><th>Spent By / Sender</th><th>Category / Recipient</th><th>Amount Spent</th><th>Remarks</th>{isAdmin && <th>Action</th>}</tr></thead>
           <tbody>
             {filtered.map((e, i) => (
               <tr key={e.id}>
                 <td>{i + 1}</td><td>{fmtDate(e.date)}</td><td><strong>{e.spentBy}</strong></td>
                 <td><span className="cat-badge">{e.category === 'Wallet Fund Transfer' ? `Transfer to: ${e.paidTo || '-'}` : e.category}</span></td>
                 <td><strong style={{ color: '#dc3545' }}>{inr(e.amount)}</strong></td><td>{e.remarks || '-'}</td>
-                <td>
+                {isAdmin && <td>
                   <button className="action-btn" onClick={() => openEditExp(e)}><i className="fa fa-pen-to-square"></i></button>
                   <button className="action-btn delete" onClick={() => delExp(e.id)}><i className="fa fa-trash"></i></button>
-                </td>
+                </td>}
               </tr>
             ))}
           </tbody>
