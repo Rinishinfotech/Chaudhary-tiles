@@ -26,6 +26,7 @@ export const api = {
   // expenses
   getExpenses: () => client.get('/expenses').then(r => r.data),
   addExpense: (d) => client.post('/expenses', d).then(r => r.data),
+  updateExpense: (id, d) => client.put(`/expenses/${id}`, d).then(r => r.data),
   transfer: (d) => client.post('/expenses/transfer', d).then(r => r.data),
   updateExpenseStatus: (id, status) => client.put(`/expenses/${id}/status`, { status }).then(r => r.data),
   deleteExpense: (id) => client.delete(`/expenses/${id}`).then(r => r.data),

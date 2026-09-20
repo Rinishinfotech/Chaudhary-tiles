@@ -319,6 +319,16 @@ async def update_expense_status(eid: str, payload: Dict[str, Any]):
     return await clean(doc)
 
 
+@api.put("/expenses/{eid}")
+async def update_expense(eid: str, item: ExpenseIn):
+    existing = await db.expenses.find_one({"id": eid})
+    if not existing:
+        raise HTTPException(404, "Not found")
+    await db.expenses.update_one({"id": eid}, {"$set": item.dict()})
+    doc = await db.expenses.find_one({"id": eid})
+    return await clean(doc)
+
+
 @api.delete("/expenses/{eid}")
 async def delete_expense(eid: str):
     await db.expenses.delete_one({"id": eid})
